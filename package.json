@@ -1,0 +1,27 @@
+{
+  "name": "stikk-server",
+  "version": "0.0.1",
+  "description": "My game server",
+  "main": "server.js",
+  "dependencies": {
+    
+  },
+  "engine": {
+    "node": "*",
+    "npm": "*"
+  },
+  "scripts": {
+    "start": "node server.js",
+    
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pydude/Stikk.io"
+  },
+  "author": "Luke Borowy",
+  "license": "CC-BY-1.0",
+  "bugs": {
+    "url": "https://github.com/pydude/Stikk.io/issues"
+  },
+  "homepage": "https://github.com/pydude/Stikk.io"
+}
