@@ -4,14 +4,14 @@
   "description": "My game server",
   "main": "server.js",
   "dependencies": {
-    "socket.io": "^2.0.3"
+    "socket.io": "2.0.3"
   },
   "engine": {
     "node": "*",
     "npm": "*"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js"
     
   },
   "repository": {
