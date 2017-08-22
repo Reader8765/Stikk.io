@@ -4,8 +4,8 @@
   "description": "My game server",
   "main": "server.js",
   "dependencies": {
-    "socket.io": ~"2.0.3",
-	"websocket": ~"1.0.24"
+    "socket.io": "~2.0.3",
+	"websocket": "~1.0.24"
   },
   "engine": {
     "node": ">=6.0.0",
