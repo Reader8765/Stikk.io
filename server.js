@@ -358,6 +358,7 @@ var maplimity=4500;
 var io = require('socket.io')(server,{
 	transports:(['websocket'])
 	});
+io.listen(server);
 var players=[];
 var obs=[];
 var numobs=100;
