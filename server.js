@@ -355,10 +355,7 @@ function calcStats(player){
 
 var maplimitx=7500;
 var maplimity=4500;
-var io = require('socket.io')(server,{
-	transports:(['websocket'])
-	});
-io.listen(server);
+var io = require('socket.io').listen(server);
 var players=[];
 var obs=[];
 var numobs=100;
