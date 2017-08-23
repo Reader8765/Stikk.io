@@ -297,19 +297,22 @@ function doDamage(player,op){
 }
 function kill(dead){
 	
-	console.log("ld: "+dead.ld);
+	
 	index = players.indexOf(dead);
 	players.splice(index, 1);
 	for(var player of players){
-		console.log(player.id)
+		
 		if(player.id==dead.ld){
 		    killer=player
 		}
 	}
 	killer.money+=int(dead.value/2);
+	rdid=Math.random();
 	r=[rdid,int(dead.value/2)]
 	rjoin.push(r);
-	dead.emit("Dead",[killer,r]);
+	console.log(r);
+	console.log(rdid);
+	dead.emit("Dead",[killer.name,r]);
 	
 }
 function calcStats(player){
@@ -352,7 +355,9 @@ function calcStats(player){
 
 var maplimitx=7500;
 var maplimity=4500;
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server,{
+	transports:(['websocket'])
+	});
 var players=[];
 var obs=[];
 var numobs=100;
