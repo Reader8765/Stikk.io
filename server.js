@@ -295,9 +295,23 @@ function doDamage(player,op){
 	op.rt=2000;
 	op.dt.push([d,1]);
 }
+ff=function(rid){
+	
+	  if(rid){
+		  
+		    for(r of rjoin){
+		        if(r[0]==rid){
+					
+				    
+					index = players.indexOf(r);
+			        rjoin.splice(index, 1);
+				}
+		    }
+		}  
+	}
 function kill(dead){
 	
-	
+	calcStats(dead);
 	index = players.indexOf(dead);
 	players.splice(index, 1);
 	for(var player of players){
@@ -308,15 +322,33 @@ function kill(dead){
 	}
 	killer.money+=int(dead.value/2);
 	rdid=Math.random();
-	r=[rdid,int(dead.value/2)]
-	rjoin.push(r);
-	console.log(r);
-	console.log(rdid);
-	dead.emit("Dead",[killer.name,r]);
 	
+	r=[rdid,int(dead.value/2),0];
+	
+	
+	
+	rjoin.push(r);
+	
+	console.log(dead.name+" has been killed by "+killer.name+". They had "+dead.value+" value, so they will start with "+r[1]+" money.");
+	
+	dead.emit("Dead",[killer.name,[r[0],r[1]]]);
+	calcStats(killer);
 }
+function calcLeaderboard(){
+	topNum=3
+	leaders=players.slice();
+	leaders.sort(function(a, b) { return a.value - b.value;})
+	leaders=leaders.slice(Math.max(leaders.length - topNum, 0))//10
+	leaders.reverse();
+	leadd=[];
+	for(l of leaders){
+		leadd.push([l.name,l.value]);
+	}
+	io.emit("leaderboard",leadd)
+}
+	
 function calcStats(player){
-	    
+	    oldv=int(player.value);
 	    player.speed=10;
 		player.mhealth=100;
 		player.attackspeed=10;
@@ -349,13 +381,17 @@ function calcStats(player){
 		
         }
 		player.value+=player.money;
-		console.log("UPDate: "+player.name);
+		
+		if(player.value !=oldv){
+			calcLeaderboard();
+		}
 }
 // Loading socket.io
 
 var maplimitx=7500;
 var maplimity=4500;
 var io = require('socket.io').listen(server);
+io.set('transports', ['websocket']);
 var players=[];
 var obs=[];
 var numobs=100;
@@ -364,6 +400,7 @@ var ppminy=150;
 var pominx=58;
 var pominy=129;
 var rjoin=[];
+
 //helmets
 var helmets={
         VikingHelmet:{      
@@ -493,15 +530,27 @@ for (var i=0; i<(numobs*0.1);i++){
 	
 }
 setInterval(redirectToUpdate,5);
-
+//1200000
+urt=function(){
+	len=rjoin.length
+    for(var i=0;i<len;i++){
+		r[2]+=1;
+		if(r[2]>120){//120
+			index = rjoin.indexOf(r);
+			rjoin.splice(index, 1);
+			len-=1;
+		}
+	}
+}
+setInterval(urt,10000)
 io.sockets.on('connection', function (socket, username) {
     // When the client connects, they are sent a message
     socket.emit("items",[helmets,chest,boots,weapons]);
     
 
-    socket.on('newplayer', function (name) {
+    socket.on('newplayer', function (info) {
         
-        socket.name=name;
+        socket.name=info[0];
 		socket.pos=[Math.floor((Math.random() * maplimitx)),Math.floor((Math.random() * maplimity))];
 		socket.direction=0
 		socket.actspeed=1;
@@ -527,9 +576,22 @@ io.sockets.on('connection', function (socket, username) {
 		socket.regen=10;
 		players[players.length]=socket;
 		
-		console.log(name+" has joined");
+		
+		if(info[1]){
+		    for(r of rjoin){
+		        if(r[0]==info[1]){
+					
+				    socket.money=r[1];
+					index = players.indexOf(r);
+			        rjoin.splice(index, 1);
+				}
+		    }
+		}
+		console.log(info[0]+" has joined, with "+socket.money+" money");
 		calcStats(socket);
 		socket.emit("allshapes",obs);
+		calcLeaderboard();
+		
     }); 
 
     
@@ -598,13 +660,14 @@ io.sockets.on('connection', function (socket, username) {
 		
 		
     }); 
-	socket.on('quit', function (reason) {
+	socket.on('quit', function (rj) {
+		console.log(socket.name+" quit.");
         if(players.includes(socket)){
 			index = players.indexOf(socket);
 			players.splice(index, 1);
 		}
         socket.disconnect(0);
-		
+		ff(rj);
     }); 
 });
 
