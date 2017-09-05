@@ -270,8 +270,7 @@ update=function(){
 		
 		player.rect={top: player.pos[1]-96,bottom: player.pos[1]+96,left: player.pos[0]-40,right: player.pos[0]+40,};
 		
-		//spi.push({stun:player.stun,dt:player.dt,facing: player.facing,name: player.name, pos: player.pos,mhealth: player.mhealth,chealth: player.chealth,anim: player.anim,helmet:player.helmet.name,chest:player.chest.name,boots:player.boots.name,weapon:player.weapon.name});
-		spi.push([player.id,player.pos,player.facing,player.anim]);
+		spi.push({stun:player.stun,dt:player.dt,facing: player.facing,name: player.name, pos: player.pos,mhealth: player.mhealth,chealth: player.chealth,anim: player.anim,helmet:player.helmet.name,chest:player.chest.name,boots:player.boots.name,weapon:player.weapon.name});
 		player.emit('you',[player.pos,player.money,player.helmet,player.chest,player.boots,player.weapon]);
 		if (player.chealth<=0){
 		    kill(player,op)
@@ -308,7 +307,6 @@ update=function(){
 		
 	}
 	io.emit("update",spi);
-	return spi;
 	
 }
 function rotate_point(pointX, pointY, originX, originY, angle) {
@@ -328,7 +326,6 @@ function doDamage(player,op){
 	for(mine of [player.helmet,player.chest,player.boots,player.weapon]){
 		if(mine){
 			un=mine.name.replace(/\s+/g, '')
-			io.emit("healthchange",[op.id,op.chealth])
 			if(onHit.hasOwnProperty(un)){
 				onHit[un](player,op);
 			}
@@ -373,7 +370,6 @@ function kill(dead){
 	
 	dead.emit("Dead",[killer.name,[r[0],r[1]]]);
 	calcStats(killer);
-	calcLeaderboard();
 }
 function calcLeaderboard(){
 	topNum=3
@@ -649,13 +645,6 @@ io.sockets.on('connection', function (socket, username) {
 		console.log(info[0]+" has joined, with "+socket.money+" money");
 		calcStats(socket);
 		socket.emit("allshapes",obs);
-		
-		every=[];
-		for (player of players){
-		    every.push({id:player.id,stun:player.stun,dt:player.dt,facing: player.facing,name: player.name, pos: player.pos,mhealth: player.mhealth,chealth: player.chealth,anim: player.anim,helmet:player.helmet.name,chest:player.chest.name,boots:player.boots.name,weapon:player.weapon.name});
-		}
-		io.emit("allplayers",every);
-		console.log(every);
 		calcLeaderboard();
 		
     }); 
@@ -691,16 +680,15 @@ io.sockets.on('connection', function (socket, username) {
 			z='weapons';
 		    item=weapons[iname];
 		}
-		if(item==undefined){item={cost:9999999}};
 		if(socket.money>=item.cost){
 			socket.money-=item.cost;
 			if(z=="helmet"){
 				socket.helmet=item;
-				
+				socket.chealth+=item.health;
 			}
 			else if(z=="chest"){
 				socket.chest=item;
-				
+				socket.chealth+=item.health;
 			}
 			else if(z=="boots"){
 				socket.boots=item;
@@ -708,10 +696,8 @@ io.sockets.on('connection', function (socket, username) {
 			else if(z=="weapons"){
 				socket.weapon=item;
 			}
-			socket.chealth+=(item.health!=undefined ? item.health:0)
 			console.log(socket.name+" bought: "+item.name);
 			calcStats(socket);
-			io.emit("echange",[socket.id,player.helmet.name,player.chest.name,player.boots.name,player.weapon.name]);
 			
 		}
 		
@@ -736,13 +722,7 @@ io.sockets.on('connection', function (socket, username) {
 			players.splice(index, 1);
 		}
         socket.disconnect(0);
-		every=[];
-		for (player of players){
-		    every.push({id:player.id,stun:player.stun,dt:player.dt,facing: player.facing,name: player.name, pos: player.pos,mhealth: player.mhealth,chealth: player.chealth,anim: player.anim,helmet:player.helmet.name,chest:player.chest.name,boots:player.boots.name,weapon:player.weapon.name});
-		}
-		io.emit("allplayers",every);
 		ff(rj);
-		calcLeaderboard();
     }); 
 });
 
