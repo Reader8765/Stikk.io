@@ -873,4 +873,4 @@ io.sockets.on('connection', function (socket, username) {
 		calcLeaderboard();
 	});
 });
-server.listen(3000);
+server.listen(8080);
