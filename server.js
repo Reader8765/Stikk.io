@@ -441,6 +441,31 @@ var chest = {
 		cost: 20,
 		wid: 50,
 		image: "knightchestplate"
+	},
+	FarmerShirt: {
+		name: "Farmer Shirt",
+		health: 10,
+		armor: 3,
+		cost: 20,
+		wid: 50,
+		image: "knightchestplate"
+	},
+	MossCape: {
+		name: "Moss Cape",
+		health: 83,
+		
+		cost: 30,
+		wid: 50,
+		image: "knightchestplate"
+	},
+	SpyCloak: {
+		name: "Spy Cloak",
+		health: 31,
+		armor:4,
+		speed:1,
+		cost: 30,
+		wid: 50,
+		image: "knightchestplate"
 	}
 }
 var boots = {
@@ -450,7 +475,6 @@ var boots = {
 		armor: 2,
 		cost: 50,
 		image: "ameriboots",
-		st: "After killing someone, there is a 2% chance of gaining +10 speed for 5 seconds.",
 		wid: 50
 	},
 	WeirdBoots: {
@@ -458,7 +482,6 @@ var boots = {
 		speed: 5,
 		armor: 1,
 		cost: 50,
-		st: "This is a huge - no, ginormous - no, homoungulous, description, put in to test the ability drawing system. It is a bit weird, but that's fine, because these are the weird boots!",
 		image: "weirdboot",
 		wid: 50
 	},
@@ -474,8 +497,8 @@ var boots = {
 var weapons = {
 	KnightSword: {
 		name: "Knight Sword",
-		damage: 4,
-		armorp: 2,
+		damage: 2,
+		armorp: 1,
 		aspeed: 2,
 		cost: 20,
 		image: "knightsword",
@@ -491,29 +514,48 @@ var weapons = {
 	},
 	Pitchfork: {
 		name: "Pitchfork",
-		damage: 2,
-		aspeed: 1,
+		damage: 3,
+		
 		cost: 10,
 		image: "pitchfork",
 		len: 70
 	},
+	Battleaxe: {
+		name: "Battleaxe",
+		damage: 8,
+		armorp: 1,
+		cost: 40,
+		image: "basicsword",
+		len: 150
+	},
 	Spear: {
 		name: "Spear",
-		damage: 50,
-		aspeed: 1,
-		cost: 225,
+		damage: 4,
+		armorp: 2,
+		aspeed:3,
+		cost: 40,
 		image: "spear",
 		len: 150
 	},
 	WoodenClub: {
 		name: "Wooden Club",
 		damage: 5,
-		armorp: 5,
-		aspeed: -1,
+		armorp: 2,
+		aspeed: -3,
 		cost: 20,
 		image: "woodenclub",
 		len: 85,
 		st: "10% chance of stunning opponent for 1 second."
+	},
+	Candlestick: {
+		name: "Candlestick",
+		damage: 4,
+		
+		aspeed: 5,
+		cost: 63,
+		image: "basicsword",
+		len: 80,
+		st: "50% chance to light on fire when attacking."
 	},
 };
 onHit = {
