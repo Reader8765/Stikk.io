@@ -442,6 +442,7 @@ var chest = {
 		wid: 50,
 		image: "knightchestplate"
 	},
+	//T2
 	FarmerShirt: {
 		name: "Farmer Shirt",
 		health: 10,
@@ -450,24 +451,146 @@ var chest = {
 		wid: 50,
 		image: "knightchestplate"
 	},
+	//T3
 	MossCape: {
 		name: "Moss Cape",
-		health: 83,
-		
+		health: 73,
+		regen:1,
 		cost: 30,
 		wid: 50,
 		image: "knightchestplate"
 	},
+	//T4
 	SpyCloak: {
 		name: "Spy Cloak",
 		health: 31,
 		armor:4,
 		speed:1,
-		cost: 30,
+		cost: 50,
 		wid: 50,
 		image: "knightchestplate"
-	}
+	},
+	SkeletonSuit: {
+		name: "Skeleton Suit",
+		health: 96,
+		armor:2,
+		
+		regen :4,
+		cost: 50,
+		wid: 50,
+		image: "knightchestplate"
+	},
+	//T5
+	ElvenCloak: {
+		name: "Elven Cloak",
+		health: 65,
+		armor:3,
+		speed:2,
+		regen:2,
+		cost: 70,
+		wid: 50,
+		image: "knightchestplate"
+	},
+	ChainmailChestplate: {
+		name: "Chainmail Chestplate",
+		health: 10,
+		armor:10,
+		cost: 70,
+		wid: 50,
+		image: "knightchestplate",
+		st: "10% chance of taking 0 damage."
+	},
+	
 }
+var weapons = {
+	//T0
+	SmallBranch: {
+		name: "Small Branch",
+		damage: 1,
+		cost: 3,
+		
+		image: "deadbranch",
+		len: 60
+	},
+	//T1
+	Pitchfork: {
+		name: "Pitchfork",
+		damage: 3,
+		
+		cost: 10,
+		image: "pitchfork",
+		len: 70
+	},
+	Candlestick: {
+		name: "Candlestick",
+		aspeed: 2,
+		cost: 15,
+		image: "basicsword",
+		len: 60,
+		st: "Lights opponent on fire when attacking."
+	},
+	//T2
+	KnightSword: {
+		name: "Knight Sword",
+		damage: 2,
+		armorp: 1,
+		aspeed: 2,
+		cost: 20,
+		image: "knightsword",
+		len: 80
+	},
+	WoodenClub: {
+		name: "Wooden Club",
+		damage: 5,
+		armorp: 2,
+		aspeed: -3,
+		cost: 20,
+		image: "woodenclub",
+		len: 85,
+		st: "10% chance of stunning opponent for 1 second."
+	},
+	//T3
+	Battleaxe: {
+		name: "Battleaxe",
+		damage: 8,
+		armorp: 1,
+		cost: 40,
+		image: "basicsword",
+		len: 120
+	},
+	Spear: {
+		name: "Spear",
+		damage: 4,
+		armorp: 2,
+		aspeed:3,
+		cost: 40,
+		image: "spear",
+		len: 150
+	},
+	//T4
+	Torch: {
+		name: "Torch",
+		aspeed: 2,
+		damage: 4,
+		cost: 65,
+		image: "basicsword",
+		len: 80,
+		st: "Lights opponent on fire when attacking."
+	},
+	//T5
+	Mace: {
+		name: "Mace",
+		aspeed: -1,
+		damage: 11,
+		armorp:5,
+		cost: 80,
+		image: "basicsword",
+		len: 100,
+		st: "10% chance of stunning opponent for 1 second."
+		
+	},
+	
+};
 var boots = {
 	Ameriboots: {
 		name: "Ameriboots",
@@ -494,72 +617,13 @@ var boots = {
 		wid: 50
 	}
 }
-var weapons = {
-	KnightSword: {
-		name: "Knight Sword",
-		damage: 2,
-		armorp: 1,
-		aspeed: 2,
-		cost: 20,
-		image: "knightsword",
-		len: 80
-	},
-	SmallBranch: {
-		name: "Small Branch",
-		damage: 1,
-		cost: 3,
-		
-		image: "deadbranch",
-		len: 60
-	},
-	Pitchfork: {
-		name: "Pitchfork",
-		damage: 3,
-		
-		cost: 10,
-		image: "pitchfork",
-		len: 70
-	},
-	Battleaxe: {
-		name: "Battleaxe",
-		damage: 8,
-		armorp: 1,
-		cost: 40,
-		image: "basicsword",
-		len: 150
-	},
-	Spear: {
-		name: "Spear",
-		damage: 4,
-		armorp: 2,
-		aspeed:3,
-		cost: 40,
-		image: "spear",
-		len: 150
-	},
-	WoodenClub: {
-		name: "Wooden Club",
-		damage: 5,
-		armorp: 2,
-		aspeed: -3,
-		cost: 20,
-		image: "woodenclub",
-		len: 85,
-		st: "10% chance of stunning opponent for 1 second."
-	},
-	Candlestick: {
-		name: "Candlestick",
-		damage: 4,
-		
-		aspeed: 5,
-		cost: 63,
-		image: "basicsword",
-		len: 80,
-		st: "50% chance to light on fire when attacking."
-	},
-};
 onHit = {
 	WoodenClub: function (player, op) {
+		if (Math.random() <= 0.1) {
+			addEffect(op, 0, 200);
+		}
+	},
+	Mace: function (player, op) {
 		if (Math.random() <= 0.1) {
 			addEffect(op, 0, 200);
 		}
@@ -809,4 +873,4 @@ io.sockets.on('connection', function (socket, username) {
 		calcLeaderboard();
 	});
 });
-server.listen(8080);
+server.listen(3000);
