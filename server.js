@@ -427,7 +427,7 @@ var helmets = {
 		name: "Viking Helmet",
 		health: 5,
 		armor: 1,
-		cost: 10,
+		cost: 10000,
 		wid: 80,
 		by: 75,
 		image: "vikinghelmet"
@@ -591,7 +591,7 @@ var weapons = {
 	},
 	
 };
-var boots = {
+var boots = {/*
 	Ameriboots: {
 		name: "Ameriboots",
 		speed: 3,
@@ -607,12 +607,12 @@ var boots = {
 		cost: 50,
 		image: "weirdboot",
 		wid: 50
-	},
+	},*/
 	KnightBoots: {
 		name: "Knight Boots",
 		speed: 1,
 		armor: 1,
-		cost: 10,
+		cost: 1000,
 		image: "knightboot",
 		wid: 50
 	}
@@ -740,7 +740,7 @@ io.sockets.on('connection', function (socket, username) {
 			bottom: 0
 		};
 		socket.facing = "right";
-		socket.money = 990;
+		socket.money = 0;
 		socket.hasHit = [];
 		socket.rdelay = 0;
 		socket.weapon = false;
