@@ -10,7 +10,9 @@ var server = http.createServer(function (req, res) {
 		});
 	});
 redirectToUpdate = function () {
+	
 	update();
+	
 }
 function intersectRect(r1, r2) {
 	return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
@@ -384,6 +386,15 @@ function calcLeaderboard() {
 	}
 	io.emit("leaderboard", leadd)
 }
+Math.dist=function(p1,p2){ 
+  x1=p2[0];
+  x2=p2[0];
+  y1=p1[1];
+  y2=p2[1];
+  if(!x2) x2=0; 
+  if(!y2) y2=0;
+  return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); 
+}
 function calcStats(player) {
 	oldv = int(player.value);
 	player.speed = 10;
@@ -434,14 +445,7 @@ var helmets = {
 	}
 }
 var chest = {
-	KnightChestplate: {
-		name: "Knight Chestplate",
-		health: 10,
-		armor: 3,
-		cost: 20,
-		wid: 50,
-		image: "knightchestplate"
-	},
+	
 	//T2
 	FarmerShirt: {
 		name: "Farmer Shirt",
@@ -499,6 +503,55 @@ var chest = {
 		wid: 50,
 		image: "knightchestplate",
 		st: "10% chance of taking 0 damage."
+	},
+	
+	//T6
+	KnightChestplate: {
+		name: "Knight Chestplate",
+		health: 15,
+		armor: 15,
+		cost: 100,
+		wid: 50,
+		image: "knightchestplate"
+	},
+	ArcherCloak: {
+		name: "Archer Cloak",
+		health: 178,
+		armor: 3,
+		cost: 100,
+		wid: 50,
+		speed:1,
+		image: "knightchestplate",
+		st: "Your ranged weapons do 20% more damage."
+	},
+	//T7
+	ArmyJacket: {
+		name: "Army Jacket",
+		health: 200,
+		armor: 8,
+		cost: 120,
+		wid: 50,
+		image: "knightchestplate"
+		
+	},
+	BlazingCloak: {
+		name: "Blazing Cloak",
+		health: 149,
+		armor: 8,
+		cost: 120,
+		wid: 50,
+		image: "knightchestplate",
+		st: "When you are hit by a melee weapon, the attacker is lit on fire."
+	},
+	//T9
+	TeslaChestplate: {
+		name: "Tesla Chestplate",
+		health: 339,
+		armor: 9,
+		cost: 150,
+		wid: 50,
+		image: "knightchestplate",
+		st: "When you are attacked, 7% chance to zap 3 nearby shapes or players for 20 damage."
 	},
 	
 }
@@ -589,7 +642,51 @@ var weapons = {
 		st: "10% chance of stunning opponent for 1 second."
 		
 	},
+	//T6
 	
+	ElvenBlade: {
+		name: "Elven Blade",
+		aspeed: 9,
+		damage: 9,
+		armorp:2,
+		cost: 100,
+		image: "basicsword",
+		len: 80
+	},
+	TeslaSword: {
+		name: "Tesla Sword",
+		aspeed: 1,
+		damage: 9,
+		armorp:5,
+		cost: 100,
+		image: "basicsword",
+		len: 80,
+		st: "When attacking, 7% chance to zap 3 nearby shapes or players for 20 damage."
+	},
+	//T8
+	MegaHammer: {
+		name: "Mega Hammer",
+		aspeed: -5,
+		damage: 76,
+		armorp:10,
+		cost: 150,
+		image: "basicsword",
+		len: 120
+		
+	},
+	SpyKnife: {
+		name: "Spy Knife",
+		aspeed: 10,
+		damage: 19,
+		
+		cost: 150,
+		image: "basicsword",
+		len: 50
+		
+	},
+	//T9
+	/*
+	*/
 };
 var boots = {/*
 	Ameriboots: {
@@ -619,6 +716,11 @@ var boots = {/*
 }
 onHit = {
 	WoodenClub: function (player, op) {
+		console.time("cat");
+		for(g of obs){
+		    dist=Math.dist(player.pos,g.pos);
+		}
+		console.timeEnd("cat");
 		if (Math.random() <= 0.1) {
 			addEffect(op, 0, 200);
 		}
@@ -740,7 +842,7 @@ io.sockets.on('connection', function (socket, username) {
 			bottom: 0
 		};
 		socket.facing = "right";
-		socket.money = 0;
+		socket.money = 990;
 		socket.hasHit = [];
 		socket.rdelay = 0;
 		socket.weapon = false;
@@ -873,4 +975,4 @@ io.sockets.on('connection', function (socket, username) {
 		calcLeaderboard();
 	});
 });
-server.listen(3000);
+server.listen(8080);
