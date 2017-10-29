@@ -968,6 +968,7 @@ onHit = {
 			}
 	   }
 }
+
 onShapeHit={
 	TeslaSword:
 	    function (player, ob) {
