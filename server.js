@@ -973,10 +973,12 @@ onShapeHit={
 	TeslaSword:
 	    function (player, ob) {
 			
+
 			
 			
 			md=700;
 			if (Math.random() <= 0.1) {
+				console.time("tes:")
 				czap=[]
 				for(p of players){
 					if(player!=p){
@@ -1049,6 +1051,7 @@ onShapeHit={
 				}
 				
 				addEffect("map", 2, 500,true,points);
+				console.timeEnd("tes:")
 			}
 	   },
 	Candlestick:
@@ -1446,7 +1449,7 @@ io.sockets.on('connection', function (socket, username) {
 	socket.on('aend', function (info) {
 		socket.attacking = !1
 	});
-	socket.on('quit', function (rj) {
+	socket.on('disconnect', function (rj) {
 		console.log(socket.name + " quit.");
 		if (players.includes(socket)) {
 			index = players.indexOf(socket);
