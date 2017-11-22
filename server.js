@@ -1,5 +1,7 @@
 var http = require('http');
 var fs = require('fs');
+
+
 var pp = [[27, -32], [27, -32], [28, -31], [28, -31], [29, -30], [30, -30], [30, -29], [31, -28], [31, -28], [32, -27], [32, -27], [32, -26], [33, -26], [33, -25], [34, -24], [34, -24], [35, -23], [35, -23], [35, -22], [36, -21], [36, -21], [37, -20], [37, -19], [37, -19], [38, -18], [38, -17], [38, -17], [39, -16], [39, -15], [39, -15], [39, -14], [40, -13], [40, -13], [40, -12], [40, -11], [40, -10], [41, -10], [41, -9], [41, -8], [41, -8], [41, -7], [41, -6], [42, -5], [42, -5], [42, -4], [42, -3], [42, -2], [42, -2], [42, -1], [42, 0], [42, 0], [42, 0], [42, 1], [42, 2], [42, 2], [42, 3], [42, 4], [42, 5], [42, 5], [41, 6], [41, 7], [41, 8], [41, 8], [41, 9], [41, 10], [40, 10], [40, 11], [40, 12], [40, 13], [40, 13], [39, 14], [39, 15], [39, 15], [39, 16], [38, 17], [38, 17], [38, 18], [37, 19], [37, 19], [37, 20], [36, 21], [36, 21], [35, 22], [35, 23], [35, 23], [34, 24], [34, 24], [33, 25], [33, 26], [32, 26], [32, 27], [32, 27], [31, 28], [31, 28], [30, 29], [30, 30], [29, 30], [28, 31], [28, 31], [27, 32], [27, 32], [26, -32]];
 var server = http.createServer(function (req, res) {
 		fs.readFile('./index.html', 'utf-8', function (error, content) {
@@ -9,6 +11,8 @@ var server = http.createServer(function (req, res) {
 			res.end(content);
 		});
 	});
+
+
 redirectToUpdate = function () {
 	
 	update();
@@ -22,6 +26,9 @@ function int(n) {
 };
 function intersectPoint(p, r) {
 	return ((p[0] < r.right) && (p[0] > r.left) && (p[1] < r.bottom) && (p[1] > r.top))
+}
+function debug(info){
+	addEffect("map", "debug", 5,1,info)
 }
 update = function () {
 	for (ob of obs) {
@@ -48,8 +55,33 @@ update = function () {
 	}
 	spi = []
 	for (player of players) {
-		player.anim = Math.round(player.attackdel / 10);
-		//player.anim=int(Math.max(Math.min(player.direction+45,101),0))
+	    if (player.atype=="Melee"){
+		    player.anim = Math.round(player.attackdel / 10);
+		}
+		else if (player.atype=="Ranged"){
+		    
+		    if (player.direction>-90){
+
+		        aangle=50-Math.abs(int(player.direction))
+				aangle=Math.min(Math.max(aangle,0),100)
+		    }else if (player.direction<-270){
+
+		        aangle=51-(Math.abs((int(player.direction)))-360)
+				aangle=Math.min(Math.max(aangle,0),100)
+		    }else{// if (player.direction<-131 && player.direction>-232)
+
+		        aangle=(Math.abs((int(player.direction)))-108)-24
+				aangle=Math.min(Math.max(aangle,0),100)
+		    }
+			player.anim=aangle
+			aangle=aangle+40
+			if (player.facing=="left"){
+				aangle=360-aangle
+			}
+			
+			
+		}
+
 		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180);
 		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180);
 		donef = []
@@ -81,76 +113,80 @@ update = function () {
 		}
 		if (!(!player.attacking && player.attackdel == 0)) {
 			player.attackdel += player.attackspeed;
-			for (op of players) {
-				if ((op != player) && !player.hasHit.includes(op)) {
-					hh = pp[player.anim];
-					if (player.facing == "right") {
-						p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-					} else {
-						p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-					}
-					inter1 = intersectPoint(p, op.rect);
-					if (player.weapon) {
-						usa = player.anim + 40;
-						if (player.facing == "right") {
-							pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
-						} else {
-							pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
-						}
-						inter2 = intersectPoint([pos.x, pos.y], op.rect);
-						if (!inter2 && player.weapon.len >= 80) {
-							usa = player.anim + 40;
-							if (player.facing == "right") {
-								pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
-							} else {
-								pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
-							}
-							inter2 = intersectPoint([pos.x, pos.y], op.rect);
-						}
-					} else {
-						inter2 = false
-					};
-					if (inter1 || inter2) {
-						doDamage(player, op,true);
-					}
-				}
-			}
-			
-			for (ob of obs) {
+            if (player.atype=="Melee"){
+                for (op of players) {
+                    if ((op != player) && !player.hasHit.includes(op)) {
+                        hh = pp[player.anim];
+                        if (player.facing == "right") {
+                            p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
+                        } else {
+                            p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
+                        }
+                        inter1 = intersectPoint(p, op.rect);
+                        if (player.weapon) {
+                            usa = player.anim + 40;
+                            if (player.facing == "right") {
+                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+                            } else {
+                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+                            }
+                            inter2 = intersectPoint([pos.x, pos.y], op.rect);
+                            if (!inter2 && player.weapon.len >= 80) {
+                                usa = player.anim + 40;
+                                if (player.facing == "right") {
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                } else {
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                }
+                                inter2 = intersectPoint([pos.x, pos.y], op.rect);
+                            }
+                        } else {
+                            inter2 = false
+                        };
+                        if (inter1 || inter2) {
+                            doDamage(player, op,true);
+                        }
+                    }
+                }
+
+                for (ob of obs) {
+
+                    if (!player.hasHit.includes(ob)) {
+                        hh = pp[player.anim];
+                        if (player.facing == "right") {
+                            p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
+                        } else {
+                            p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
+                        }
+                        inter1 = intersectPoint(p, ob.rect);
+                        if (player.weapon) {
+                            usa = player.anim + 40;
+                            if (player.facing == "right") {
+                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+                            } else {
+                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+                            }
+                            inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+                            if (!inter2 && player.weapon.len >= 80) {
+                                usa = player.anim + 40;
+                                if (player.facing == "right") {
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                } else {
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                }
+                                inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+                            }
+                        } else {
+                            inter2 = false
+                        };
+                        if (inter2 || inter1) {
+                            player.hasHit.push(ob);
+                            damageShape(ob,player,player.damage,true)
+                        }
+                    }
+                }
+            }else{
 				
-				if (!player.hasHit.includes(ob)) {
-					hh = pp[player.anim];
-					if (player.facing == "right") {
-						p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-					} else {
-						p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-					}
-					inter1 = intersectPoint(p, ob.rect);
-					if (player.weapon) {
-						usa = player.anim + 40;
-						if (player.facing == "right") {
-							pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
-						} else {
-							pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
-						}
-						inter2 = intersectPoint([pos.x, pos.y], ob.rect);
-						if (!inter2 && player.weapon.len >= 80) {
-							usa = player.anim + 40;
-							if (player.facing == "right") {
-								pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
-							} else {
-								pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
-							}
-							inter2 = intersectPoint([pos.x, pos.y], ob.rect);
-						}
-					} else {
-						inter2 = false
-					};
-					if (inter2 || inter1) {
-						player.hasHit.push(ob);
-						damageShape(ob,player,player.damage,true)
-					}
-				}
 			}
 			if (player.attackdel >= 1000) {
 				player.attackdel = 0;
@@ -504,7 +540,8 @@ function calcStats(player) {
 	player.armor = 0;
 	player.regen = 10;
 	player.value = 0;
-	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
+	player.atype="Melee"
+	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			player.speed += (mine.speed != undefined ? mine.speed : 0)
 			player.damage += (mine.damage != undefined ? mine.damage : 0)
@@ -514,6 +551,7 @@ function calcStats(player) {
 			player.mhealth += (mine.health != undefined ? mine.health : 0)
 			player.regen += (mine.regen != undefined ? mine.regen : 0)
 			player.value += mine.cost;
+			player.atype= (mine.type != undefined ? mine.type : "Melee")
 		}
 	}
 	player.value += player.money;
@@ -678,6 +716,7 @@ var weapons = {
 	SmallBranch: {
 		name: "Small Branch",
 		damage: 1,
+		type: "Melee",
 		cost: 3,
 		
 		image: "deadbranch",
@@ -688,13 +727,24 @@ var weapons = {
 		name: "Pitchfork",
 		damage: 3,
 		
+		type: "Melee",
 		cost: 10,
 		image: "pitchfork",
+		len: 70
+	},
+	BasicBow: {
+		name: "Basic Bow",
+		damage: 1,
+
+		type: "Ranged",
+		cost: 10,
+		image: "bow",
 		len: 70
 	},
 	Candlestick: {
 		name: "Candlestick",
 		aspeed: 2,
+		type: "Melee",
 		cost: 15,
 		image: "candlestick",
 		len: 60,
@@ -706,6 +756,7 @@ var weapons = {
 		damage: 2,
 		armorp: 1,
 		aspeed: 2,
+		type: "Melee",
 		cost: 20,
 		image: "knightsword",
 		len: 80
@@ -715,6 +766,7 @@ var weapons = {
 		damage: 5,
 		armorp: 3,
 		aspeed: -3,
+		type: "Melee",
 		cost: 20,
 		image: "woodenclub",
 		len: 85,
@@ -725,6 +777,7 @@ var weapons = {
 		name: "Battleaxe",
 		damage: 8,
 		armorp: 1,
+		type: "Melee",
 		cost: 40,
 		image: "battleaxe",
 		len: 120
@@ -734,6 +787,7 @@ var weapons = {
 		damage: 4,
 		armorp: 2,
 		aspeed:3,
+		type: "Melee",
 		cost: 40,
 		image: "spear",
 		len: 150
@@ -743,6 +797,7 @@ var weapons = {
 		name: "Torch",
 		aspeed: 2,
 		damage: 4,
+		type: "Melee",
 		cost: 65,
 		image: "torch",
 		len: 110,
@@ -754,6 +809,7 @@ var weapons = {
 		aspeed: -1,
 		damage: 11,
 		armorp:5,
+		type: "Melee",
 		cost: 80,
 		image: "mace",
 		len: 100,
@@ -767,6 +823,7 @@ var weapons = {
 		aspeed: 9,
 		damage: 9,
 		armorp:2,
+		type: "Melee",
 		cost: 100,
 		image: "elvenblade",
 		len: 120
@@ -776,6 +833,7 @@ var weapons = {
 		aspeed: 1,
 		damage: 9,
 		armorp:5,
+		type: "Melee",
 		cost: 100,
 		image: "teslasword",
 		len: 100,
@@ -787,6 +845,7 @@ var weapons = {
 		aspeed: -5,
 		damage: 76,
 		armorp:10,
+		type: "Melee",
 		cost: 150,
 		image: "megahammer",
 		len: 120
@@ -796,6 +855,7 @@ var weapons = {
 		name: "Spy Knife",
 		aspeed: 10,
 		damage: 19,
+		type: "Melee",
 		cost: 150,
 		image: "spyknife",
 		len: 50
@@ -807,6 +867,7 @@ var weapons = {
 		aspeed: 3,
 		damage: 32,
 		armorp:3,
+		type: "Melee",
 		cost: 200,
 		image: "blazingsword",
 		len: 90,
@@ -818,6 +879,7 @@ var weapons = {
 		aspeed: 1,
 		damage: 41,
 		armorp:3,
+		type: "Melee",
 		cost: 200,
 		image: "trident",
 		len: 150
