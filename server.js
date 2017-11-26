@@ -30,7 +30,8 @@ function intersectPoint(p, r) {
 function debug(info){
 	addEffect("map", "debug", 5,1,info)
 }
-update = function () {
+update = function () {	
+    
 	for (ob of obs) {
 		for (f of ob.effects) {
 			if (f[0] == 1) {
@@ -53,6 +54,15 @@ update = function () {
 		}
 			
 	}
+    pi=[]
+    for (proj of projs){
+        proj.pos[0]+=proj.vel[0]*0.05;
+        proj.pos[1]+=proj.vel[1]*0.05;
+        pi.push([proj.id,proj.pos])
+        proj.hitpos=[proj.pos[0]+proj.hitoff[0],proj.pos[1]+proj.hitoff[1]]
+        
+        
+    }
 	spi = []
 	for (player of players) {
 	    if (player.atype=="Melee"){
@@ -111,88 +121,106 @@ update = function () {
 			index = player.effects.indexOf(f);
 			player.effects.splice(index, 1);
 		}
-		if (!(!player.attacking && player.attackdel == 0)) {
-			player.attackdel += player.attackspeed;
-            if (player.atype=="Melee"){
-                for (op of players) {
-                    if ((op != player) && !player.hasHit.includes(op)) {
-                        hh = pp[player.anim];
-                        if (player.facing == "right") {
-                            p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-                        } else {
-                            p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-                        }
-                        inter1 = intersectPoint(p, op.rect);
-                        if (player.weapon) {
-                            usa = player.anim + 40;
+        if (player.atype=="Melee"){
+            if (!(!player.attacking && player.attackdel == 0)) {
+                player.attackdel += player.attackspeed;
+
+                    for (op of players) {
+                        if ((op != player) && !player.hasHit.includes(op)) {
+                            hh = pp[player.anim];
                             if (player.facing == "right") {
-                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+                                p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
                             } else {
-                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+                                p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
                             }
-                            inter2 = intersectPoint([pos.x, pos.y], op.rect);
-                            if (!inter2 && player.weapon.len >= 80) {
+                            inter1 = intersectPoint(p, op.rect);
+                            if (player.weapon) {
                                 usa = player.anim + 40;
                                 if (player.facing == "right") {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
                                 } else {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
                                 }
                                 inter2 = intersectPoint([pos.x, pos.y], op.rect);
+                                if (!inter2 && player.weapon.len >= 80) {
+                                    usa = player.anim + 40;
+                                    if (player.facing == "right") {
+                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                    } else {
+                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                    }
+                                    inter2 = intersectPoint([pos.x, pos.y], op.rect);
+                                }
+                            } else {
+                                inter2 = false
+                            };
+                            if (inter1 || inter2) {
+                                doDamage(player, op,true);
                             }
-                        } else {
-                            inter2 = false
-                        };
-                        if (inter1 || inter2) {
-                            doDamage(player, op,true);
                         }
                     }
-                }
 
-                for (ob of obs) {
+                    for (ob of obs) {
 
-                    if (!player.hasHit.includes(ob)) {
-                        hh = pp[player.anim];
-                        if (player.facing == "right") {
-                            p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-                        } else {
-                            p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-                        }
-                        inter1 = intersectPoint(p, ob.rect);
-                        if (player.weapon) {
-                            usa = player.anim + 40;
+                        if (!player.hasHit.includes(ob)) {
+                            hh = pp[player.anim];
                             if (player.facing == "right") {
-                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+                                p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
                             } else {
-                                pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+                                p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
                             }
-                            inter2 = intersectPoint([pos.x, pos.y], ob.rect);
-                            if (!inter2 && player.weapon.len >= 80) {
+                            inter1 = intersectPoint(p, ob.rect);
+                            if (player.weapon) {
                                 usa = player.anim + 40;
                                 if (player.facing == "right") {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
                                 } else {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
                                 }
                                 inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+                                if (!inter2 && player.weapon.len >= 80) {
+                                    usa = player.anim + 40;
+                                    if (player.facing == "right") {
+                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+                                    } else {
+                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+                                    }
+                                    inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+                                }
+                            } else {
+                                inter2 = false
+                            };
+                            if (inter2 || inter1) {
+                                player.hasHit.push(ob);
+                                damageShape(ob,player,player.damage,true)
                             }
-                        } else {
-                            inter2 = false
-                        };
-                        if (inter2 || inter1) {
-                            player.hasHit.push(ob);
-                            damageShape(ob,player,player.damage,true)
                         }
                     }
+
+                if (player.attackdel >= 1000) {
+                    player.attackdel = 0;
+                    player.hasHit = [];
                 }
-            }else{
-				
-			}
-			if (player.attackdel >= 1000) {
-				player.attackdel = 0;
-				player.hasHit = [];
-			}
-		} else {}
+            }
+        }
+        else if (player.atype=="Ranged"){
+            
+            if (player.attacking){
+                if (player.attackdel==0){
+                    pos=rotate_point(player.pos[0], -40 + player.pos[1] , player.pos[0], player.pos[1], aangle);
+                    pos=[pos.x,pos.y]
+                    addProj(player.weapon.name,player.weapon.ammolen/2,pos,aangle)   
+                }
+            }
+            if (!(!player.attacking && player.attackdel == 0)){
+                player.attackdel+=player.attackspeed;
+                if (player.attackdel >= 1000) {
+                        player.attackdel = 0;
+                }
+            }
+                
+                
+        }
 		player.pos[0] += xm;
 		for (op of players) {
 			if (op != player) {
@@ -282,7 +310,7 @@ update = function () {
 			player.chealth = player.mhealth;
 		}
 	}
-	io.emit("update", spi);
+	io.emit("update", [spi,pi]);
 	return spi;
 }
 function rotate_point(pointX, pointY, originX, originY, angle) {
@@ -291,6 +319,14 @@ function rotate_point(pointX, pointY, originX, originY, angle) {
 		x: Math.cos(angle) * (pointX - originX) - Math.sin(angle) * (pointY - originY) + originX,
 		y: Math.sin(angle) * (pointX - originX) + Math.cos(angle) * (pointY - originY) + originY
 	};
+}
+function addProj(type,len,pos,ang){
+    n={id:Math.random(),type:type,pos:pos,ang:ang}
+	io.emit("newproj",n)
+    n.vel=[5 * Math.sin(ang * Math.PI / 180),-5 * Math.cos(ang * Math.PI / 180)]	
+    n.hitoff=[len * Math.sin(ang * Math.PI / 180),-len * Math.cos(ang * Math.PI / 180)]
+    projs.push(n)
+    
 }
 function doDamage(player, op,abil) {
 	player.hasHit.push(op);
@@ -482,25 +518,7 @@ function kill(dead) {
 	dead.emit("Dead", [killer.name, [r[0], r[1]]]);
 	
 	calcLeaderboard();
-	every = [];
-	for (player of players) {
-		every.push({
-			id: player.id,
-			effects: player.effects,
-			dt: player.dt,
-			facing: player.facing,
-			name: player.name,
-			pos: player.pos,
-			mhealth: player.mhealth,
-			chealth: player.chealth,
-			anim: player.anim,
-			helmet: player.helmet.name,
-			chest: player.chest.name,
-			boots: player.boots.name,
-			weapon: player.weapon.name
-		});
-	}
-	io.emit("allplayers", every);
+	io.emit("delplayer", dead.id);
 }
 function calcLeaderboard() {
 	topNum = 3
@@ -564,6 +582,7 @@ var maplimity = 4500;
 var io = require('socket.io').listen(server);
 var players = [];
 var obs = [];
+var projs=[];
 var numobs = 100;
 var ppminx = 50;
 var ppminy = 150;
@@ -697,7 +716,7 @@ var chest = {
 		cost: 220,
 		wid: 50,
 		image: "knightchestplate",
-		st: "Your stunning abilities have 10% greater chance to activate."
+		st: "Your stun abilities have 10% greater chance to activate."
 	},
 	//T10
 	ChestplateOfGlory: {
@@ -735,11 +754,13 @@ var weapons = {
 	BasicBow: {
 		name: "Basic Bow",
 		damage: 1,
-
 		type: "Ranged",
 		cost: 10,
+        
 		image: "bow",
-		len: 70
+		ammolen: 70,
+		len: 80,
+		offx: -20
 	},
 	Candlestick: {
 		name: "Candlestick",
@@ -1431,13 +1452,13 @@ io.sockets.on('connection', function (socket, username) {
 		}
 		console.log(info[0] + " has joined, with " + socket.money + " money");
 		calcStats(socket);
-		socket.emit("allshapes", obs);
+		
 		every = [];
 		for (player of players) {
 			every.push({
 				id: player.id,
 				effects: player.effects,
-				dt: player.dt,
+				
 				facing: player.facing,
 				name: player.name,
 				pos: player.pos,
@@ -1450,7 +1471,27 @@ io.sockets.on('connection', function (socket, username) {
 				weapon: player.weapon.name
 			});
 		}
-		io.emit("allplayers", every);
+        cobs = [];
+		for (ob of obs) {
+			cobs.push({
+				id: ob.id,
+				effects: ob.effects,			
+				pos: ob.pos,
+				health: ob.health,
+                type:ob.type
+			});
+		}
+        cprojs = [];
+		for (p of projs) {
+			cprojs.push({
+				id: p.id,						
+				pos: p.pos,
+				ang: p.direction,
+                type:p.type
+			});
+		}
+		socket.emit("all", [every,cobs,cprojs]);
+        io.emit("newplayer",[socket.id,socket.pos,socket.name])
 		calcLeaderboard();
 	});
 	socket.on('dchange', function (newd) {
@@ -1518,25 +1559,8 @@ io.sockets.on('connection', function (socket, username) {
 			players.splice(index, 1);
 		}
 		socket.disconnect(0);
-		every = [];
-		for (player of players) {
-			every.push({
-				id: player.id,
-				effects: player.effects,
-				dt: player.dt,
-				facing: player.facing,
-				name: player.name,
-				pos: player.pos,
-				mhealth: player.mhealth,
-				chealth: player.chealth,
-				anim: player.anim,
-				helmet: player.helmet.name,
-				chest: player.chest.name,
-				boots: player.boots.name,
-				weapon: player.weapon.name
-			});
-		}
-		io.emit("allplayers", every);
+		
+		io.emit("delplayer", socket.id);
 		ff(rj);
 		calcLeaderboard();
 	});
