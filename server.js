@@ -55,13 +55,23 @@ update = function () {
 			
 	}
     pi=[]
+    rem=[]
     for (proj of projs){
-        proj.pos[0]+=proj.vel[0]*0.05;
-        proj.pos[1]+=proj.vel[1]*0.05;
+        proj.pos[0]+=proj.vel[0];
+        proj.pos[1]+=proj.vel[1];
         pi.push([proj.id,proj.pos])
         proj.hitpos=[proj.pos[0]+proj.hitoff[0],proj.pos[1]+proj.hitoff[1]]
+        for (ob of obs) {
+                inter = intersectPoint(proj.hitpos, ob.rect);     
+                if (inter) {
+                    damageShape(ob,player,proj.damage,true)
+                    rem.push(proj)
+                }
+        }
         
-        
+    }
+    for (r of rem){
+        remProj(r)
     }
 	spi = []
 	for (player of players) {
@@ -209,7 +219,7 @@ update = function () {
                 if (player.attackdel==0){
                     pos=rotate_point(player.pos[0], -40 + player.pos[1] , player.pos[0], player.pos[1], aangle);
                     pos=[pos.x,pos.y]
-                    addProj(player.weapon.name,player.weapon.ammolen/2,pos,aangle)   
+                    addProj(player.weapon,pos,aangle,player)   
                 }
             }
             if (!(!player.attacking && player.attackdel == 0)){
@@ -320,13 +330,20 @@ function rotate_point(pointX, pointY, originX, originY, angle) {
 		y: Math.sin(angle) * (pointX - originX) + Math.cos(angle) * (pointY - originY) + originY
 	};
 }
-function addProj(type,len,pos,ang){
-    n={id:Math.random(),type:type,pos:pos,ang:ang}
+function addProj(weapon,pos,ang,shotby){
+    n={id:Math.random(),type:weapon.name,pos:pos,ang:ang}
 	io.emit("newproj",n)
+    n.shotby=shotby
     n.vel=[5 * Math.sin(ang * Math.PI / 180),-5 * Math.cos(ang * Math.PI / 180)]	
+    len=weapon.ammolen/2
     n.hitoff=[len * Math.sin(ang * Math.PI / 180),-len * Math.cos(ang * Math.PI / 180)]
+    n.damage=shotby.damage
     projs.push(n)
-    
+}
+function remProj(proj){
+    index = projs.indexOf(proj);
+	projs.splice(index, 1);
+    io.emit("delproj",proj.id)
 }
 function doDamage(player, op,abil) {
 	player.hasHit.push(op);
