@@ -60,11 +60,19 @@ update = function () {
         proj.pos[0]+=proj.vel[0];
         proj.pos[1]+=proj.vel[1];
         pi.push([proj.id,proj.pos])
+        player=proj.shotby
         proj.hitpos=[proj.pos[0]+proj.hitoff[0],proj.pos[1]+proj.hitoff[1]]
         for (ob of obs) {
                 inter = intersectPoint(proj.hitpos, ob.rect);     
                 if (inter) {
                     damageShape(ob,player,proj.damage,true)
+                    rem.push(proj)
+                }
+        }
+        for (op of players) {
+                inter = intersectPoint(proj.hitpos, op.rect);     
+                if (inter) {
+                    doDamage(player,op,true,proj.damage)
                     rem.push(proj)
                 }
         }
@@ -287,8 +295,8 @@ update = function () {
 			left: player.pos[0] - 40,
 			right: player.pos[0] + 40,
 		};
-		spi.push([player.id, player.pos, player.facing, player.anim]);
-		player.emit('you', [player.pos, player.money, player.helmet, player.chest, player.boots, player.weapon]);
+		spi.push([player.id, [Math.round(player.pos[0]),Math.round(player.pos[1])], player.facing, player.anim]);
+		
 		if (player.chealth <= 0) {
 			kill(player, op)
 		}
@@ -330,6 +338,12 @@ function rotate_point(pointX, pointY, originX, originY, angle) {
 		y: Math.sin(angle) * (pointX - originX) + Math.cos(angle) * (pointY - originY) + originY
 	};
 }
+
+function roundList(list) {
+	for (var i = 0; i < list.length; i++){
+        list[i]=Math.round(list[i])
+    }
+}
 function addProj(weapon,pos,ang,shotby){
     n={id:Math.random(),type:weapon.name,pos:pos,ang:ang}
 	io.emit("newproj",n)
@@ -345,10 +359,11 @@ function remProj(proj){
 	projs.splice(index, 1);
     io.emit("delproj",proj.id)
 }
-function doDamage(player, op,abil) {
+
+function doDamage(player, op,abil,d) {
 	player.hasHit.push(op);
 	op.ld = player.id;
-	d = Math.max(player.damage - (Math.max(op.armor - player.armorp, 0)), 0);
+	d = d || Math.max(player.damage - (Math.max(op.armor - player.armorp, 0)), 0);
 	
 	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
@@ -501,11 +516,9 @@ spawnShape=function(old,player){
 		}
 		
 	}
-	if(typeof player === 'number'){}
-	else{
-	player.money += old.money;
-	calcStats(player);
-	}
+	changeMoney(player,old.money)
+	
+	
 	index = obs.indexOf(old);
 	obs.splice(index, 1);
 	io.emit("newshape", {
@@ -524,8 +537,7 @@ function kill(dead) {
 	}
 	if(typeof player === 'number'){}
 	else{
-	    killer.money += int(dead.value / 2);
-		calcStats(killer);
+        changeMoney(killer,int(dead.value / 2))
 	}
 	
 	rdid = Math.random();
@@ -565,8 +577,14 @@ Math.dist=function(pos1,pos2) {
 	 
 	return Math.sqrt( xs + ys );
 };
+function changeMoney(player,changeBy){
+    player.money+=changeBy
+    player.emit("moneyChange",player.money)
+    calcStats(player)
+}
 function calcStats(player) {
 	oldv = int(player.value);
+    oldMon=int(player.money)
 	player.speed = 10;
 	player.mhealth = 100;
 	player.attackspeed = 10;
@@ -592,6 +610,7 @@ function calcStats(player) {
 	player.value += player.money;
 	if (player.value != oldv) {
 		calcLeaderboard();
+        
 	}
 }
 var maplimitx = 7500;
@@ -1078,7 +1097,7 @@ onShapeHit={
 			
 			md=700;
 			if (Math.random() <= 0.1) {
-				console.time("tes:")
+				
 				czap=[]
 				for(p of players){
 					if(player!=p){
@@ -1151,7 +1170,7 @@ onShapeHit={
 				}
 				
 				addEffect("map", 2, 500,true,points);
-				console.timeEnd("tes:")
+				
 			}
 	   },
 	Candlestick:
@@ -1446,7 +1465,7 @@ io.sockets.on('connection', function (socket, username) {
 			bottom: 0
 		};
 		socket.facing = "right";
-		socket.money = 9990;
+		socket.money = 0;
 		socket.hasHit = [];
 		socket.rdelay = 0;
 		socket.weapon = false;
@@ -1507,8 +1526,8 @@ io.sockets.on('connection', function (socket, username) {
                 type:p.type
 			});
 		}
-		socket.emit("all", [every,cobs,cprojs]);
         io.emit("newplayer",[socket.id,socket.pos,socket.name])
+		socket.emit("all", [every,cobs,cprojs,socket.id,socket.money]);
 		calcLeaderboard();
 	});
 	socket.on('dchange', function (newd) {
@@ -1524,6 +1543,7 @@ io.sockets.on('connection', function (socket, username) {
 			socket.actspeed = Math.min(newd[1], 1);
 	});
 	socket.on('buyitem', function (iname) {
+        item=undefined
 		iname = iname.replace(/\s+/g, '');
 		if (helmets.hasOwnProperty(iname)) {
 			z = 'helmet';
@@ -1535,7 +1555,7 @@ io.sockets.on('connection', function (socket, username) {
 			z = 'boots';
 			item = boots[iname];
 		} else if (weapons.hasOwnProperty(iname)) {
-			z = 'weapons';
+			z = 'weapon';
 			item = weapons[iname];
 		}
 		if (item == undefined) {
@@ -1544,14 +1564,14 @@ io.sockets.on('connection', function (socket, username) {
 			}
 		};
 		if (socket.money >= item.cost) {
-			socket.money -= item.cost;
+			changeMoney(socket,-item.cost)
 			if (z == "helmet") {
 				socket.helmet = item;
 			} else if (z == "chest") {
 				socket.chest = item;
 			} else if (z == "boots") {
 				socket.boots = item;
-			} else if (z == "weapons") {
+			} else if (z == "weapon") {
 				socket.weapon = item;
 			}
 			socket.chealth += (item.health != undefined ? item.health : 0)
@@ -1560,7 +1580,7 @@ io.sockets.on('connection', function (socket, username) {
 			if (player.chealth > player.mhealth) {
 				player.chealth = player.mhealth;
 			}
-			io.emit("echange", [socket.id, socket.helmet.name, socket.chest.name, socket.boots.name, socket.weapon.name, socket.chealth, socket.mhealth]);
+			io.emit("echange", [socket.id, item.name,z]);
 		}
 	});
 	socket.on('astart', function (info) {
