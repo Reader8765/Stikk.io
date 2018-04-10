@@ -1512,7 +1512,7 @@ io.sockets.on('connection', function (socket, username) {
 			bottom: 0
 		};
 		socket.facing = "right";
-		socket.money = 990;
+		socket.money = 0;
 		socket.hasHit = [];
 		socket.rdelay = 0;
 		socket.weapon = false;
