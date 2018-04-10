@@ -30,6 +30,12 @@ function intersectPoint(p, r) {
 function debug(info){
 	addEffect("map", "debug", 5,1,info)
 }
+function isOutOfBounds(x,y){
+		return x>maplimitx || y>maplimity || x<0 || x<0;
+}
+function isSwordSwinging(player){
+	return (!(!player.attacking && player.attackdel == 0))
+}
 update = function () {	
     
 	for (ob of obs) {
@@ -56,17 +62,29 @@ update = function () {
 	}
     pi=[]
     rem=[]
+	projLoop:
     for (proj of projs){
         proj.pos[0]+=proj.vel[0];
         proj.pos[1]+=proj.vel[1];
+		proj.traveled+=proj.speed;
         pi.push([proj.id,proj.pos])
         player=proj.shotby
         proj.hitpos=[proj.pos[0]+proj.hitoff[0],proj.pos[1]+proj.hitoff[1]]
+		if (isOutOfBounds(proj.hitpos[0],proj.hitpos[1])){
+			rem.push(proj)
+			continue projLoop;
+		}
+		if (proj.traveled>proj.range){
+			rem.push(proj)
+			continue projLoop;
+		}
         for (ob of obs) {
                 inter = intersectPoint(proj.hitpos, ob.rect);     
                 if (inter) {
                     damageShape(ob,player,proj.damage,true)
                     rem.push(proj)
+					continue projLoop;
+					
                 }
         }
         for (op of players) {
@@ -74,6 +92,7 @@ update = function () {
                 if (inter) {
                     doDamage(player,op,true,proj.damage)
                     rem.push(proj)
+					continue projLoop;
                 }
         }
         
@@ -109,9 +128,14 @@ update = function () {
 			
 			
 		}
-
-		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180);
-		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180);
+        var speedMod;
+		if(isSwordSwinging(player)){
+			speedMod=0.5;
+		}else{
+			speedMod=1;
+		}
+		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180)*speedMod;
+		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180)*speedMod;
 		donef = []
 		for (f of player.effects) {
 			if (f[0] == 0) {
@@ -140,7 +164,7 @@ update = function () {
 			player.effects.splice(index, 1);
 		}
         if (player.atype=="Melee"){
-            if (!(!player.attacking && player.attackdel == 0)) {
+            if (isSwordSwinging(player)) {
                 player.attackdel += player.attackspeed;
 
                     for (op of players) {
@@ -329,7 +353,7 @@ update = function () {
 		}
 	}
 	io.emit("update", [spi,pi]);
-	return spi;
+	
 }
 function rotate_point(pointX, pointY, originX, originY, angle) {
 	angle = angle * Math.PI / 180.0;
@@ -346,13 +370,16 @@ function roundList(list) {
 }
 function addProj(weapon,pos,ang,shotby){
     n={id:Math.random(),type:weapon.name,pos:pos,ang:ang}
-	io.emit("newproj",n)
-    n.shotby=shotby
-    n.vel=[5 * Math.sin(ang * Math.PI / 180),-5 * Math.cos(ang * Math.PI / 180)]	
-    len=weapon.ammolen/2
+	io.emit("newproj",n);
+    n.shotby=shotby;
+    n.vel=[weapon.projSpeed * Math.sin(ang * Math.PI / 180),-weapon.projSpeed * Math.cos(ang * Math.PI / 180)]	
+    len=weapon.ammolen/2;
+	n.range=weapon.range;
     n.hitoff=[len * Math.sin(ang * Math.PI / 180),-len * Math.cos(ang * Math.PI / 180)]
-    n.damage=shotby.damage
-    projs.push(n)
+    n.damage=shotby.damage;
+	n.traveled=0;
+	n.speed=weapon.projSpeed;
+    projs.push(n);
 }
 function remProj(proj){
     index = projs.indexOf(proj);
@@ -792,7 +819,8 @@ var weapons = {
 		damage: 1,
 		type: "Ranged",
 		cost: 10,
-        
+        range: 750,
+		projSpeed: 5,
 		image: "bow",
 		ammolen: 70,
 		len: 80,
@@ -860,6 +888,18 @@ var weapons = {
 		len: 110,
 		st: "25% chance to light opponent on fire when attacking."
 	},
+	/*FlamingBow: {
+		name: "Flaming Bow",//stats wrong!!
+		damage: 1,
+		type: "Ranged",
+		cost: 10,
+        range: 750,
+		projSpeed: 5,
+		image: "bow",
+		ammolen: 70,
+		len: 80,
+		offx: -20
+	},*/
 	//T5
 	Mace: {
 		name: "Mace",
@@ -894,7 +934,7 @@ var weapons = {
 		cost: 100,
 		image: "teslasword",
 		len: 100,
-		st: "When attacking, 10% chance to zap 3 nearby shapes or players for 20 damage."
+		st: "When attacking, 20% chance to zap 3 nearby shapes or players for 20 damage."
 	},
 	//T8
 	MegaHammer: {
@@ -939,12 +979,19 @@ var weapons = {
 		type: "Melee",
 		cost: 200,
 		image: "trident",
-		len: 150
-		
-		
+		len: 150	
 	}
 	//T10
-	
+	/*GoldenClub: {
+		name: "Golden Club",
+		aspeed: -4,
+		damage: 54,
+		armorp:20,
+		type: "Melee",
+		cost: 300,
+		image: "goldenclub",
+		len: 85	
+	}
 	/*
 	*/
 };
@@ -1012,7 +1059,7 @@ onHit = {
 	    function (player, op) {
 			
 			md=700;
-			if (Math.random() <= 0.1) {
+			if (Math.random() <= 0.2) {
 				czap=[]
 				for(p of players){
 					if(player!=p){
@@ -1096,7 +1143,7 @@ onShapeHit={
 			
 			
 			md=700;
-			if (Math.random() <= 0.1) {
+			if (Math.random() <= 0.2) {
 				
 				czap=[]
 				for(p of players){
@@ -1465,7 +1512,7 @@ io.sockets.on('connection', function (socket, username) {
 			bottom: 0
 		};
 		socket.facing = "right";
-		socket.money = 0;
+		socket.money = 990;
 		socket.hasHit = [];
 		socket.rdelay = 0;
 		socket.weapon = false;
