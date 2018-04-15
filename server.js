@@ -1,7 +1,6 @@
 var http = require('http');
 var fs = require('fs');
 
-
 var pp = [[27, -32], [27, -32], [28, -31], [28, -31], [29, -30], [30, -30], [30, -29], [31, -28], [31, -28], [32, -27], [32, -27], [32, -26], [33, -26], [33, -25], [34, -24], [34, -24], [35, -23], [35, -23], [35, -22], [36, -21], [36, -21], [37, -20], [37, -19], [37, -19], [38, -18], [38, -17], [38, -17], [39, -16], [39, -15], [39, -15], [39, -14], [40, -13], [40, -13], [40, -12], [40, -11], [40, -10], [41, -10], [41, -9], [41, -8], [41, -8], [41, -7], [41, -6], [42, -5], [42, -5], [42, -4], [42, -3], [42, -2], [42, -2], [42, -1], [42, 0], [42, 0], [42, 0], [42, 1], [42, 2], [42, 2], [42, 3], [42, 4], [42, 5], [42, 5], [41, 6], [41, 7], [41, 8], [41, 8], [41, 9], [41, 10], [40, 10], [40, 11], [40, 12], [40, 13], [40, 13], [39, 14], [39, 15], [39, 15], [39, 16], [38, 17], [38, 17], [38, 18], [37, 19], [37, 19], [37, 20], [36, 21], [36, 21], [35, 22], [35, 23], [35, 23], [34, 24], [34, 24], [33, 25], [33, 26], [32, 26], [32, 27], [32, 27], [31, 28], [31, 28], [30, 29], [30, 30], [29, 30], [28, 31], [28, 31], [27, 32], [27, 32], [26, -32]];
 var server = http.createServer(function (req, res) {
 		fs.readFile('./index.html', 'utf-8', function (error, content) {
@@ -12,11 +11,10 @@ var server = http.createServer(function (req, res) {
 		});
 	});
 
-
 redirectToUpdate = function () {
-	
+
 	update();
-	
+
 }
 function intersectRect(r1, r2) {
 	return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
@@ -27,27 +25,27 @@ function int(n) {
 function intersectPoint(p, r) {
 	return ((p[0] < r.right) && (p[0] > r.left) && (p[1] < r.bottom) && (p[1] > r.top))
 }
-function debug(info){
-	addEffect("map", "debug", 5,1,info)
+function debug(info) {
+	addEffect("map", "debug", 5, 1, info)
 }
-function isOutOfBounds(x,y){
-		return x>maplimitx || y>maplimity || x<0 || x<0;
+function isOutOfBounds(x, y) {
+	return x > maplimitx || y > maplimity || x < 0 || x < 0;
 }
-function isSwordSwinging(player){
+function isSwordSwinging(player) {
 	return (!(!player.attacking && player.attackdel == 0))
 }
-update = function () {	
-    
+update = function () {
+
 	for (ob of obs) {
 		for (f of ob.effects) {
 			if (f[0] == 1) {
-				if(f[3][0]>=f[3][1]){
-					damageShape(ob,f[3][3],f[3][2],false)
-					f[3][0]=0;
-					
-				}else{
-					f[3][0]+=1;				
-					}
+				if (f[3][0] >= f[3][1]) {
+					damageShape(ob, f[3][3], f[3][2], false)
+					f[3][0] = 0;
+
+				} else {
+					f[3][0] += 1;
+				}
 			}
 			f[1] -= 1
 			if (f[1] < 1) {
@@ -58,84 +56,82 @@ update = function () {
 				ob.effects.splice(index, 1);
 			}
 		}
-			
+
 	}
-    pi=[]
-    rem=[]
+	pi = []
+	rem = []
 	projLoop:
-    for (proj of projs){
-        proj.pos[0]+=proj.vel[0];
-        proj.pos[1]+=proj.vel[1];
-		proj.traveled+=proj.speed;
-        pi.push([proj.id,proj.pos])
-        player=proj.shotby
-        proj.hitpos=[proj.pos[0]+proj.hitoff[0],proj.pos[1]+proj.hitoff[1]]
-		if (isOutOfBounds(proj.hitpos[0],proj.hitpos[1])){
-			rem.push(proj)
-			continue projLoop;
-		}
-		if (proj.traveled>proj.range){
-			rem.push(proj)
-			continue projLoop;
-		}
-        for (ob of obs) {
-                inter = intersectPoint(proj.hitpos, ob.rect);     
-                if (inter) {
-                    damageShape(ob,player,proj.damage,true)
-                    rem.push(proj)
+	for (proj of projs) {
+		proj.pos[0] += proj.vel[0];
+		proj.pos[1] += proj.vel[1];
+		proj.traveled += proj.speed;
+		pi.push([proj.id, proj.pos])
+		player = proj.shotby
+			proj.hitpos = [proj.pos[0] + proj.hitoff[0], proj.pos[1] + proj.hitoff[1]]
+			if (isOutOfBounds(proj.hitpos[0], proj.hitpos[1])) {
+				rem.push(proj)
+				continue projLoop;
+			}
+			if (proj.traveled > proj.range) {
+				rem.push(proj)
+				continue projLoop;
+			}
+			for (ob of obs) {
+				inter = intersectPoint(proj.hitpos, ob.rect);
+				if (inter) {
+					damageShape(ob, player, proj.damage, true)
+					rem.push(proj)
 					continue projLoop;
-					
-                }
-        }
-        for (op of players) {
-                inter = intersectPoint(proj.hitpos, op.rect);     
-                if (inter) {
-                    doDamage(player,op,true,proj.damage)
-                    rem.push(proj)
+
+				}
+			}
+			for (op of players) {
+				inter = intersectPoint(proj.hitpos, op.rect);
+				if (inter) {
+					doDamage(player, op, true, proj.damage)
+					rem.push(proj)
 					continue projLoop;
-                }
-        }
-        
-    }
-    for (r of rem){
-        remProj(r)
-    }
+				}
+			}
+
+	}
+	for (r of rem) {
+		remProj(r)
+	}
 	spi = []
 	for (player of players) {
-	    if (player.atype=="Melee"){
-		    player.anim = Math.round(player.attackdel / 10);
-		}
-		else if (player.atype=="Ranged"){
-		    
-		    if (player.direction>-90){
+		if (player.atype == "Melee") {
+			player.anim = Math.round(player.attackdel / 10);
+		} else if (player.atype == "Ranged") {
 
-		        aangle=50-Math.abs(int(player.direction))
-				aangle=Math.min(Math.max(aangle,0),100)
-		    }else if (player.direction<-270){
+			if (player.direction > -90) {
 
-		        aangle=51-(Math.abs((int(player.direction)))-360)
-				aangle=Math.min(Math.max(aangle,0),100)
-		    }else{// if (player.direction<-131 && player.direction>-232)
+				aangle = 50 - Math.abs(int(player.direction))
+					aangle = Math.min(Math.max(aangle, 0), 100)
+			} else if (player.direction < -270) {
 
-		        aangle=(Math.abs((int(player.direction)))-108)-24
-				aangle=Math.min(Math.max(aangle,0),100)
-		    }
-			player.anim=aangle
-			aangle=aangle+40
-			if (player.facing=="left"){
-				aangle=360-aangle
+				aangle = 51 - (Math.abs((int(player.direction))) - 360)
+					aangle = Math.min(Math.max(aangle, 0), 100)
+			} else { // if (player.direction<-131 && player.direction>-232)
+
+				aangle = (Math.abs((int(player.direction))) - 108) - 24
+				aangle = Math.min(Math.max(aangle, 0), 100)
 			}
-			
-			
+			player.anim = aangle
+				aangle = aangle + 40
+				if (player.facing == "left") {
+					aangle = 360 - aangle
+				}
+
 		}
-        var speedMod;
-		if(isSwordSwinging(player)){
-			speedMod=0.5;
-		}else{
-			speedMod=1;
+		var speedMod;
+		if (isSwordSwinging(player)) {
+			speedMod = 0.5;
+		} else {
+			speedMod = 1;
 		}
-		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180)*speedMod;
-		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180)*speedMod;
+		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180) * speedMod;
+		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180) * speedMod;
 		donef = []
 		for (f of player.effects) {
 			if (f[0] == 0) {
@@ -144,15 +140,15 @@ update = function () {
 				ym = 0;
 			}
 			if (f[0] == 1) {
-				if(f[3][0]>=f[3][1]){
-					
-					f[3][0]=0;
-					dirDamage(player,f[3][2],f[3][3])
-				}else{
-					f[3][0]+=1;
-					
-					}
-				
+				if (f[3][0] >= f[3][1]) {
+
+					f[3][0] = 0;
+					dirDamage(player, f[3][2], f[3][3])
+				} else {
+					f[3][0] += 1;
+
+				}
+
 			}
 			f[1] -= 1
 			if (f[1] < 1) {
@@ -163,106 +159,104 @@ update = function () {
 			index = player.effects.indexOf(f);
 			player.effects.splice(index, 1);
 		}
-        if (player.atype=="Melee"){
-            if (isSwordSwinging(player)) {
-                player.attackdel += player.attackspeed;
+		if (player.atype == "Melee") {
+			if (isSwordSwinging(player)) {
+				player.attackdel += player.attackspeed;
 
-                    for (op of players) {
-                        if ((op != player) && !player.hasHit.includes(op)) {
-                            hh = pp[player.anim];
-                            if (player.facing == "right") {
-                                p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-                            } else {
-                                p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-                            }
-                            inter1 = intersectPoint(p, op.rect);
-                            if (player.weapon) {
-                                usa = player.anim + 40;
-                                if (player.facing == "right") {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
-                                } else {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
-                                }
-                                inter2 = intersectPoint([pos.x, pos.y], op.rect);
-                                if (!inter2 && player.weapon.len >= 80) {
-                                    usa = player.anim + 40;
-                                    if (player.facing == "right") {
-                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
-                                    } else {
-                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
-                                    }
-                                    inter2 = intersectPoint([pos.x, pos.y], op.rect);
-                                }
-                            } else {
-                                inter2 = false
-                            };
-                            if (inter1 || inter2) {
-                                doDamage(player, op,true);
-                            }
-                        }
-                    }
+				for (op of players) {
+					if ((op != player) && !player.hasHit.includes(op)) {
+						hh = pp[player.anim];
+						if (player.facing == "right") {
+							p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
+						} else {
+							p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
+						}
+						inter1 = intersectPoint(p, op.rect);
+						if (player.weapon) {
+							usa = player.anim + 40;
+							if (player.facing == "right") {
+								pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+							} else {
+								pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+							}
+							inter2 = intersectPoint([pos.x, pos.y], op.rect);
+							if (!inter2 && player.weapon.len >= 80) {
+								usa = player.anim + 40;
+								if (player.facing == "right") {
+									pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+								} else {
+									pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+								}
+								inter2 = intersectPoint([pos.x, pos.y], op.rect);
+							}
+						} else {
+							inter2 = false
+						};
+						if (inter1 || inter2) {
+							doDamage(player, op, true);
+						}
+					}
+				}
 
-                    for (ob of obs) {
+				for (ob of obs) {
 
-                        if (!player.hasHit.includes(ob)) {
-                            hh = pp[player.anim];
-                            if (player.facing == "right") {
-                                p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
-                            } else {
-                                p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
-                            }
-                            inter1 = intersectPoint(p, ob.rect);
-                            if (player.weapon) {
-                                usa = player.anim + 40;
-                                if (player.facing == "right") {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
-                                } else {
-                                    pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
-                                }
-                                inter2 = intersectPoint([pos.x, pos.y], ob.rect);
-                                if (!inter2 && player.weapon.len >= 80) {
-                                    usa = player.anim + 40;
-                                    if (player.facing == "right") {
-                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
-                                    } else {
-                                        pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
-                                    }
-                                    inter2 = intersectPoint([pos.x, pos.y], ob.rect);
-                                }
-                            } else {
-                                inter2 = false
-                            };
-                            if (inter2 || inter1) {
-                                player.hasHit.push(ob);
-                                damageShape(ob,player,player.damage,true)
-                            }
-                        }
-                    }
+					if (!player.hasHit.includes(ob)) {
+						hh = pp[player.anim];
+						if (player.facing == "right") {
+							p = [hh[0] + player.pos[0], hh[1] + player.pos[1]];
+						} else {
+							p = [player.pos[0] - hh[0], hh[1] + player.pos[1]];
+						}
+						inter1 = intersectPoint(p, ob.rect);
+						if (player.weapon) {
+							usa = player.anim + 40;
+							if (player.facing == "right") {
+								pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], usa)
+							} else {
+								pos = rotate_point(player.pos[0], -40 + player.pos[1] - player.weapon.len, player.pos[0], player.pos[1], -usa)
+							}
+							inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+							if (!inter2 && player.weapon.len >= 80) {
+								usa = player.anim + 40;
+								if (player.facing == "right") {
+									pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], usa)
+								} else {
+									pos = rotate_point(player.pos[0], -40 + player.pos[1] - (player.weapon.len / 2), player.pos[0], player.pos[1], -usa)
+								}
+								inter2 = intersectPoint([pos.x, pos.y], ob.rect);
+							}
+						} else {
+							inter2 = false
+						};
+						if (inter2 || inter1) {
+							player.hasHit.push(ob);
+							damageShape(ob, player, player.damage, true)
+						}
+					}
+				}
 
-                if (player.attackdel >= 1000) {
-                    player.attackdel = 0;
-                    player.hasHit = [];
-                }
-            }
-        }
-        else if (player.atype=="Ranged"){
-            
-            if (player.attacking){
-                if (player.attackdel==0){
-                    pos=rotate_point(player.pos[0], -40 + player.pos[1] , player.pos[0], player.pos[1], aangle);
-                    pos=[pos.x,pos.y]
-                    addProj(player.weapon,pos,aangle,player)   
-                }
-            }
-            if (!(!player.attacking && player.attackdel == 0)){
-                player.attackdel+=player.attackspeed;
-                if (player.attackdel >= 1000) {
-                        player.attackdel = 0;
-                }
-            }
-                
-                
-        }
+				if (player.attackdel >= 1000) {
+					player.attackdel = 0;
+					player.hasHit = [];
+				}
+			}
+		} else if (player.atype == "Ranged") {
+
+			if (player.attacking) {
+				if (player.attackdel == 0) {
+					pos = rotate_point(player.pos[0], -40 + player.pos[1], player.pos[0], player.pos[1], aangle);
+					pos = [pos.x, pos.y]
+					addProj(player.weapon, pos, aangle, player)
+				}
+			}
+			if (!(!player.attacking && player.attackdel == 0)) {
+				player.attackdel += player.attackspeed;
+				if (player.attackdel >= 1000) {
+					player.attackdel = 0;
+				}
+			}
+
+		}
 		player.pos[0] += xm;
 		for (op of players) {
 			if (op != player) {
@@ -319,8 +313,8 @@ update = function () {
 			left: player.pos[0] - 40,
 			right: player.pos[0] + 40,
 		};
-		spi.push([player.id, [Math.round(player.pos[0]),Math.round(player.pos[1])], player.facing, player.anim]);
-		
+		spi.push([player.id, [Math.round(player.pos[0]), Math.round(player.pos[1])], player.facing, player.anim]);
+
 		if (player.chealth <= 0) {
 			kill(player, op)
 		}
@@ -352,8 +346,8 @@ update = function () {
 			player.chealth = player.mhealth;
 		}
 	}
-	io.emit("update", [spi,pi]);
-	
+	io.emit("update", [spi, pi]);
+
 }
 function rotate_point(pointX, pointY, originX, originY, angle) {
 	angle = angle * Math.PI / 180.0;
@@ -364,39 +358,44 @@ function rotate_point(pointX, pointY, originX, originY, angle) {
 }
 
 function roundList(list) {
-	for (var i = 0; i < list.length; i++){
-        list[i]=Math.round(list[i])
-    }
+	for (var i = 0; i < list.length; i++) {
+		list[i] = Math.round(list[i])
+	}
 }
-function addProj(weapon,pos,ang,shotby){
-    n={id:Math.random(),type:weapon.name,pos:pos,ang:ang}
-	io.emit("newproj",n);
-    n.shotby=shotby;
-    n.vel=[weapon.projSpeed * Math.sin(ang * Math.PI / 180),-weapon.projSpeed * Math.cos(ang * Math.PI / 180)]	
-    len=weapon.ammolen/2;
-	n.range=weapon.range;
-    n.hitoff=[len * Math.sin(ang * Math.PI / 180),-len * Math.cos(ang * Math.PI / 180)]
-    n.damage=shotby.damage;
-	n.traveled=0;
-	n.speed=weapon.projSpeed;
-    projs.push(n);
+function addProj(weapon, pos, ang, shotby) {
+	n = {
+		id: Math.random(),
+		type: weapon.name,
+		pos: pos,
+		ang: ang
+	}
+	io.emit("newproj", n);
+	n.shotby = shotby;
+	n.vel = [weapon.projSpeed * Math.sin(ang * Math.PI / 180), -weapon.projSpeed * Math.cos(ang * Math.PI / 180)]
+	len = weapon.ammolen / 2;
+	n.range = weapon.range;
+	n.hitoff = [len * Math.sin(ang * Math.PI / 180), -len * Math.cos(ang * Math.PI / 180)]
+	n.damage = shotby.damage;
+	n.traveled = 0;
+	n.speed = weapon.projSpeed;
+	projs.push(n);
 }
-function remProj(proj){
-    index = projs.indexOf(proj);
+function remProj(proj) {
+	index = projs.indexOf(proj);
 	projs.splice(index, 1);
-    io.emit("delproj",proj.id)
+	io.emit("delproj", proj.id)
 }
 
-function doDamage(player, op,abil,d) {
+function doDamage(player, op, abil, d) {
 	player.hasHit.push(op);
 	op.ld = player.id;
 	d = d || Math.max(player.damage - (Math.max(op.armor - player.armorp, 0)), 0);
-	
+
 	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
 				if (onHit.hasOwnProperty(un)) {
-					
+
 					onHit[un](player, op);
 				}
 		}
@@ -405,20 +404,20 @@ function doDamage(player, op,abil,d) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
 				if (onAttacked.hasOwnProperty(un)) {
-					d=onAttacked[un](player,op,d);
-		}
-	}
-	
+					d = onAttacked[un](player, op, d);
 				}
+		}
+
+	}
 	op.chealth -= d;
 	op.rt = 2000;
 	io.emit("healthchange", [op.id, op.chealth])
 }
-function dirDamage(player, da,id) {
-	
+function dirDamage(player, da, id) {
+
 	player.chealth -= da;
 	player.rt = 2000;
-	player.ld=id;
+	player.ld = id;
 	io.emit("healthchange", [player.id, player.chealth])
 }
 ff = function (rid) {
@@ -431,23 +430,23 @@ ff = function (rid) {
 		}
 	}
 }
-damageShape=function(shape,player,da,abil){
+damageShape = function (shape, player, da, abil) {
 	shape.health -= da;
-	if(abil){
+	if (abil) {
 		for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
 			if (mine) {
 				un = mine.name.replace(/\s+/g, '')
 					if (onShapeHit.hasOwnProperty(un)) {
-						
+
 						onShapeHit[un](player, shape);
 					}
 			}
 		}
 	}
 	if (shape.health <= 0) {
-		
-		spawnShape(shape,player)
-		
+
+		spawnShape(shape, player)
+
 	} else {
 		io.emit("shapechange", {
 			shape: shape.id,
@@ -455,9 +454,9 @@ damageShape=function(shape,player,da,abil){
 		});
 	}
 }
-spawnShape=function(old,player){
-	oldt=old.type;
-	
+spawnShape = function (old, player) {
+	oldt = old.type;
+
 	if (oldt == 1) {
 		nx = Math.floor((Math.random() * maplimitx));
 		ny = Math.floor((Math.random() * maplimity));
@@ -534,18 +533,17 @@ spawnShape=function(old,player){
 		};
 		obs.push(nob);
 	}
-	
-	if(typeof player === 'number'){
-		for(p of players){
-		    if(p.id==player){
-				player=p;
+
+	if (typeof player === 'number') {
+		for (p of players) {
+			if (p.id == player) {
+				player = p;
 			}
 		}
-		
+
 	}
-	changeMoney(player,old.money)
-	
-	
+	changeMoney(player, old.money)
+
 	index = obs.indexOf(old);
 	obs.splice(index, 1);
 	io.emit("newshape", {
@@ -562,17 +560,17 @@ function kill(dead) {
 			killer = player
 		}
 	}
-	if(typeof player === 'number'){}
-	else{
-        changeMoney(killer,int(dead.value / 2))
+	if (typeof player === 'number') {}
+	else {
+		changeMoney(killer, int(dead.value / 2))
 	}
-	
+
 	rdid = Math.random();
 	r = [rdid, int(dead.value / 2), 0];
 	rjoin.push(r);
 	console.log(dead.name + " has been killed by " + killer.name + ". They had " + dead.value + " value, so they will start with " + r[1] + " money.");
-	dead.emit("Dead", [killer.name, [r[0], r[1]]]);
-	
+	dead.emit("dead", [killer.name, [r[0], r[1]]]);
+
 	calcLeaderboard();
 	io.emit("delplayer", dead.id);
 }
@@ -590,29 +588,29 @@ function calcLeaderboard() {
 	}
 	io.emit("leaderboard", leadd)
 }
-Math.dist=function(pos1,pos2) {
-	x1=pos1[0]
-	x2=pos2[0]
-	y1=pos1[1]
-	y2=pos2[1]
+Math.dist = function (pos1, pos2) {
+	x1 = pos1[0]
+		x2 = pos2[0]
+		y1 = pos1[1]
+		y2 = pos2[1]
 
-	var 	xs = x2 - x1,
-		ys = y2 - y1;		
-	
+		var xs = x2 - x1,
+	ys = y2 - y1;
+
 	xs *= xs;
 	ys *= ys;
-	 
-	return Math.sqrt( xs + ys );
+
+	return Math.sqrt(xs + ys);
 };
-function changeMoney(player,changeBy){
-    player.money+=changeBy
-    player.emit("moneyChange",player.money)
-    calcStats(player)
+function changeMoney(player, changeBy) {
+	player.money += changeBy
+	player.emit("moneyChange", player.money)
+	calcStats(player)
 }
 function calcStats(player) {
 	oldv = int(player.value);
-    oldMon=int(player.money)
-	player.speed = 10;
+	oldMon = int(player.money)
+		player.speed = 10;
 	player.mhealth = 100;
 	player.attackspeed = 10;
 	player.damage = 10;
@@ -620,24 +618,24 @@ function calcStats(player) {
 	player.armor = 0;
 	player.regen = 10;
 	player.value = 0;
-	player.atype="Melee"
-	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
-		if (mine) {
-			player.speed += (mine.speed != undefined ? mine.speed : 0)
-			player.damage += (mine.damage != undefined ? mine.damage : 0)
-			player.attackspeed += (mine.aspeed != undefined ? mine.aspeed : 0)
-			player.armorp += (mine.armorp != undefined ? mine.armorp : 0)
-			player.armor += (mine.armor != undefined ? mine.armor : 0)
-			player.mhealth += (mine.health != undefined ? mine.health : 0)
-			player.regen += (mine.regen != undefined ? mine.regen : 0)
-			player.value += mine.cost;
-			player.atype= (mine.type != undefined ? mine.type : "Melee")
+	player.atype = "Melee"
+		for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
+			if (mine) {
+				player.speed += (mine.speed != undefined ? mine.speed : 0)
+				player.damage += (mine.damage != undefined ? mine.damage : 0)
+				player.attackspeed += (mine.aspeed != undefined ? mine.aspeed : 0)
+				player.armorp += (mine.armorp != undefined ? mine.armorp : 0)
+				player.armor += (mine.armor != undefined ? mine.armor : 0)
+				player.mhealth += (mine.health != undefined ? mine.health : 0)
+				player.regen += (mine.regen != undefined ? mine.regen : 0)
+				player.value += mine.cost;
+				player.atype = (mine.type != undefined ? mine.type : "Melee")
+			}
 		}
-	}
-	player.value += player.money;
+		player.value += player.money;
 	if (player.value != oldv) {
 		calcLeaderboard();
-        
+
 	}
 }
 var maplimitx = 7500;
@@ -645,7 +643,7 @@ var maplimity = 4500;
 var io = require('socket.io').listen(server);
 var players = [];
 var obs = [];
-var projs=[];
+var projs = [];
 var numobs = 100;
 var ppminx = 50;
 var ppminy = 150;
@@ -664,7 +662,7 @@ var helmets = {
 	}
 }
 var chest = {
-	
+
 	//T2
 	FarmerShirt: {
 		name: "Farmer Shirt",
@@ -678,7 +676,7 @@ var chest = {
 	MossCape: {
 		name: "Moss Cape",
 		health: 73,
-		regen:1,
+		regen: 1,
 		cost: 30,
 		wid: 50,
 		image: "knightchestplate"
@@ -687,8 +685,8 @@ var chest = {
 	SpyCloak: {
 		name: "Spy Cloak",
 		health: 31,
-		armor:4,
-		speed:1,
+		armor: 4,
+		speed: 1,
 		cost: 50,
 		wid: 50,
 		image: "knightchestplate"
@@ -696,9 +694,9 @@ var chest = {
 	SkeletonSuit: {
 		name: "Skeleton Suit",
 		health: 96,
-		armor:2,
-		
-		regen :4,
+		armor: 2,
+
+		regen: 4,
 		cost: 50,
 		wid: 50,
 		image: "knightchestplate"
@@ -707,9 +705,9 @@ var chest = {
 	ElvenCloak: {
 		name: "Elven Cloak",
 		health: 65,
-		armor:3,
-		speed:2,
-		regen:2,
+		armor: 3,
+		speed: 2,
+		regen: 2,
 		cost: 70,
 		wid: 50,
 		image: "knightchestplate"
@@ -717,13 +715,13 @@ var chest = {
 	ChainmailChestplate: {
 		name: "Chainmail Chestplate",
 		health: 10,
-		armor:10,
+		armor: 10,
 		cost: 70,
 		wid: 50,
 		image: "knightchestplate",
 		st: "10% chance of taking 0 damage."
 	},
-	
+
 	//T6
 	KnightChestplate: {
 		name: "Knight Chestplate",
@@ -739,7 +737,7 @@ var chest = {
 		armor: 3,
 		cost: 100,
 		wid: 50,
-		speed:1,
+		speed: 1,
 		image: "knightchestplate",
 		st: "Your ranged weapons do 20% more damage."
 	},
@@ -751,7 +749,7 @@ var chest = {
 		cost: 120,
 		wid: 50,
 		image: "knightchestplate"
-		
+
 	},
 	BlazingCloak: {
 		name: "Blazing Cloak",
@@ -789,9 +787,9 @@ var chest = {
 		cost: 300,
 		wid: 50,
 		image: "knightchestplate",
-		
+
 	},
-	
+
 }
 var weapons = {
 	//T0
@@ -800,7 +798,7 @@ var weapons = {
 		damage: 1,
 		type: "Melee",
 		cost: 3,
-		
+
 		image: "deadbranch",
 		len: 60
 	},
@@ -808,7 +806,7 @@ var weapons = {
 	Pitchfork: {
 		name: "Pitchfork",
 		damage: 3,
-		
+
 		type: "Melee",
 		cost: 10,
 		image: "pitchfork",
@@ -819,7 +817,7 @@ var weapons = {
 		damage: 1,
 		type: "Ranged",
 		cost: 10,
-        range: 750,
+		range: 750,
 		projSpeed: 5,
 		image: "bow",
 		ammolen: 70,
@@ -871,7 +869,7 @@ var weapons = {
 		name: "Spear",
 		damage: 4,
 		armorp: 2,
-		aspeed:3,
+		aspeed: 3,
 		type: "Melee",
 		cost: 40,
 		image: "spear",
@@ -889,37 +887,37 @@ var weapons = {
 		st: "25% chance to light opponent on fire when attacking."
 	},
 	/*FlamingBow: {
-		name: "Flaming Bow",//stats wrong!!
-		damage: 1,
-		type: "Ranged",
-		cost: 10,
-        range: 750,
-		projSpeed: 5,
-		image: "bow",
-		ammolen: 70,
-		len: 80,
-		offx: -20
+	name: "Flaming Bow",//stats wrong!!
+	damage: 1,
+	type: "Ranged",
+	cost: 10,
+	range: 750,
+	projSpeed: 5,
+	image: "bow",
+	ammolen: 70,
+	len: 80,
+	offx: -20
 	},*/
 	//T5
 	Mace: {
 		name: "Mace",
 		aspeed: -1,
 		damage: 11,
-		armorp:5,
+		armorp: 5,
 		type: "Melee",
 		cost: 80,
 		image: "mace",
 		len: 100,
 		st: "10% chance of stunning opponent for 1 second."
-		
+
 	},
 	//T6
-	
+
 	ElvenBlade: {
 		name: "Elven Blade",
 		aspeed: 9,
 		damage: 9,
-		armorp:2,
+		armorp: 2,
 		type: "Melee",
 		cost: 100,
 		image: "elvenblade",
@@ -929,7 +927,7 @@ var weapons = {
 		name: "Tesla Sword",
 		aspeed: 1,
 		damage: 9,
-		armorp:5,
+		armorp: 5,
 		type: "Melee",
 		cost: 100,
 		image: "teslasword",
@@ -941,12 +939,12 @@ var weapons = {
 		name: "Mega Hammer",
 		aspeed: -5,
 		damage: 76,
-		armorp:10,
+		armorp: 10,
 		type: "Melee",
 		cost: 150,
 		image: "megahammer",
 		len: 120
-		
+
 	},
 	SpyKnife: {
 		name: "Spy Knife",
@@ -956,44 +954,44 @@ var weapons = {
 		cost: 150,
 		image: "spyknife",
 		len: 50
-		
+
 	},
 	//T9
 	BlazingSword: {
 		name: "Blazing Sword",
 		aspeed: 3,
 		damage: 32,
-		armorp:3,
+		armorp: 3,
 		type: "Melee",
 		cost: 200,
 		image: "blazingsword",
 		len: 90,
 		st: "25% chance to light opponent on fire when attacking."
-		
+
 	},
 	Trident: {
 		name: "Trident",
 		aspeed: 1,
 		damage: 41,
-		armorp:3,
+		armorp: 3,
 		type: "Melee",
 		cost: 200,
 		image: "trident",
-		len: 150	
+		len: 150
 	}
 	//T10
 	/*GoldenClub: {
-		name: "Golden Club",
-		aspeed: -4,
-		damage: 54,
-		armorp:20,
-		type: "Melee",
-		cost: 300,
-		image: "goldenclub",
-		len: 85	
+	name: "Golden Club",
+	aspeed: -4,
+	damage: 54,
+	armorp:20,
+	type: "Melee",
+	cost: 300,
+	image: "goldenclub",
+	len: 85
 	}
 	/*
-	*/
+	 */
 };
 var boots = {
 	Ameriboots: {
@@ -1023,322 +1021,314 @@ var boots = {
 }
 onHit = {
 	WoodenClub: function (player, op) {
-		plus=(hasAbil(player,"GoldenCloak") ? 0.1: 0);
-		
-		if (Math.random() <= 0.1+plus) {
-			addEffect(op, 0, 200,true);
-			
+		plus = (hasAbil(player, "GoldenCloak") ? 0.1 : 0);
+
+		if (Math.random() <= 0.1 + plus) {
+			addEffect(op, 0, 200, true);
+
 		}
 	},
 	Mace: function (player, op) {
-		plus=(hasAbil(player,"GoldenCloak") ? 0.1: 0);
-		if (Math.random() <= 0.1+plus) {
-			addEffect(op, 0, 200,true);
+		plus = (hasAbil(player, "GoldenCloak") ? 0.1 : 0);
+		if (Math.random() <= 0.1 + plus) {
+			addEffect(op, 0, 200, true);
 		}
 	},
 	Candlestick:
-	    function (player, op) {
-			if (Math.random() <= 0.25) {
-				addEffect(op, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, op) {
+		if (Math.random() <= 0.25) {
+			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 	Torch:
-	    function (player, op) {
-			if (Math.random() <= 0.25) {
-				addEffect(op, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, op) {
+		if (Math.random() <= 0.25) {
+			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 	BlazingSword:
-	    function (player, op) {
-			
-			if (Math.random() <= 0.25) {
-				addEffect(op, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, op) {
+
+		if (Math.random() <= 0.25) {
+			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 	TeslaSword:
-	    function (player, op) {
-			
-			md=700;
-			if (Math.random() <= 0.2) {
-				czap=[]
-				for(p of players){
-					if(player!=p){
-						dis=Math.dist(p.pos,op.pos)
-						
-						if(dis<=md){
+	function (player, op) {
+
+		md = 700;
+		if (Math.random() <= 0.2) {
+			czap = []
+			for (p of players) {
+				if (player != p) {
+					dis = Math.dist(p.pos, op.pos)
+
+						if (dis <= md) {
 							czap.push(p);
 						}
-					}
-				    
 				}
-				for(o of obs){
-	                dis=Math.dist(op.pos,o.pos)
-					
-					if(dis<=md){
+
+			}
+			for (o of obs) {
+				dis = Math.dist(op.pos, o.pos)
+
+					if (dis <= md) {
 						czap.push(o);
 					}
-				    
-				}
-				zap=[]
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				
-				points=[]
-				
-				for(z of zap){
-					bolt=[];
-					bolt.push(op.pos)
-					
-					mid=[(op.pos[0]+z.pos[0])/2,(op.pos[1]+z.pos[1])/2]
-					mid=[mid[0]+((Math.random() - 0.5) * 150),mid[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(mid)
-					
-					midu=[(op.pos[0]+mid[0])/2,(op.pos[1]+mid[1])/2]
-					midu=[midu[0]+((Math.random() - 0.5) * 150),midu[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midu)
-					
-					midd=[(mid[0]+z.pos[0])/2,(mid[1]+z.pos[1])/2]
-					midd=[midd[0]+((Math.random() - 0.5) * 150),midd[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midd)
-					
-				    bolt.push(z.pos)
-					points.push(bolt)
-					
-					if(z.hasOwnProperty("name")){
-						dirDamage(z,20,player.id);
-					}else{
-						damageShape(z,player,20,false)
-					}
-				}
-				
-				addEffect("map", 2, 500,true,points);
+
 			}
-	   }
+			zap = []
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			points = []
+
+			for (z of zap) {
+				bolt = [];
+				bolt.push(op.pos)
+
+				mid = [(op.pos[0] + z.pos[0]) / 2, (op.pos[1] + z.pos[1]) / 2]
+				mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(mid)
+
+				midu = [(op.pos[0] + mid[0]) / 2, (op.pos[1] + mid[1]) / 2]
+				midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midu)
+
+				midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
+				midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midd)
+
+				bolt.push(z.pos)
+				points.push(bolt)
+
+				if (z.hasOwnProperty("name")) {
+					dirDamage(z, 20, player.id);
+				} else {
+					damageShape(z, player, 20, false)
+				}
+			}
+
+			addEffect("map", 2, 500, true, points);
+		}
+	}
 }
 
-onShapeHit={
+onShapeHit = {
 	TeslaSword:
-	    function (player, ob) {
-			
+	function (player, ob) {
 
-			
-			
-			md=700;
-			if (Math.random() <= 0.2) {
-				
-				czap=[]
-				for(p of players){
-					if(player!=p){
-						dis=Math.dist(p.pos,ob.pos)
-						
-						if(dis<=md){
-							
+		md = 700;
+		if (Math.random() <= 0.2) {
+
+			czap = []
+			for (p of players) {
+				if (player != p) {
+					dis = Math.dist(p.pos, ob.pos)
+
+						if (dis <= md) {
+
 							czap.push(p);
 						}
-					}
-				    
 				}
-				for(o of obs){
-	                dis=Math.dist(ob.pos,o.pos)
-					
-					if(dis<=md){
+
+			}
+			for (o of obs) {
+				dis = Math.dist(ob.pos, o.pos)
+
+					if (dis <= md) {
 						czap.push(o);
 					}
-				    
-				}
-				zap=[]
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				
-				points=[]
-				
-				for(z of zap){
-					bolt=[];
-					bolt.push(ob.pos)
-				
-					mid=[(ob.pos[0]+z.pos[0])/2,(ob.pos[1]+z.pos[1])/2]
-					mid=[mid[0]+((Math.random() - 0.5) * 150),mid[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(mid)
-					
-					midu=[(ob.pos[0]+mid[0])/2,(ob.pos[1]+mid[1])/2]
-					midu=[midu[0]+((Math.random() - 0.5) * 150),midu[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midu)
-					
-					midd=[(mid[0]+z.pos[0])/2,(mid[1]+z.pos[1])/2]
-					midd=[midd[0]+((Math.random() - 0.5) * 150),midd[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midd)
-					
-				    bolt.push(z.pos)
-					points.push(bolt)
-					
-					if(z.hasOwnProperty("name")){
-						dirDamage(z,20,player.id)
-					}else{
-						damageShape(z,player,20,false)
-					}
-				}
-				
-				addEffect("map", 2, 500,true,points);
-				
+
 			}
-	   },
+			zap = []
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			points = []
+
+			for (z of zap) {
+				bolt = [];
+				bolt.push(ob.pos)
+
+				mid = [(ob.pos[0] + z.pos[0]) / 2, (ob.pos[1] + z.pos[1]) / 2]
+				mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(mid)
+
+				midu = [(ob.pos[0] + mid[0]) / 2, (ob.pos[1] + mid[1]) / 2]
+				midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midu)
+
+				midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
+				midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midd)
+
+				bolt.push(z.pos)
+				points.push(bolt)
+
+				if (z.hasOwnProperty("name")) {
+					dirDamage(z, 20, player.id)
+				} else {
+					damageShape(z, player, 20, false)
+				}
+			}
+
+			addEffect("map", 2, 500, true, points);
+
+		}
+	},
 	Candlestick:
-	    function (player, ob) {
-			if (Math.random() <= 0.25) {
-				shapeEffect(ob, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, ob) {
+		if (Math.random() <= 0.25) {
+			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 	BlazingSword:
-	    function (player, ob) {
-			if (Math.random() <= 0.25) {
-				shapeEffect(ob, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, ob) {
+		if (Math.random() <= 0.25) {
+			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 	Torch:
-	    function (player, ob) {
-			if (Math.random() <= 0.25) {
-				shapeEffect(ob, 1, 500,false,[0,75,2,player.id]);
-			}
-	   },
+	function (player, ob) {
+		if (Math.random() <= 0.25) {
+			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+		}
+	},
 }
-
 
 onAttacked = {
 	ChainmailChestplate:
-		function (player, op, damage) {
-			
-				if (Math.random() <= 0.1) {
-					
-					return 0
-				}
-				return damage
-		},
+	function (player, op, damage) {
+
+		if (Math.random() <= 0.1) {
+
+			return 0
+		}
+		return damage
+	},
 	BlazingCloak:
-	    function (player, op,damage) {
-			if (Math.random() <= 0.25) {
-				addEffect(player, 1, 500,false,[0,75,2]);
-			}
-			return damage
-	   },
-	TeslaChestplate:function (player, op,damage) {
-			
-			md=700;
-			if (Math.random() <= 0.1) {
-				czap=[]
-				for(p of players){
-					if(op!=p){
-						dis=Math.dist(p.pos,op.pos)
-						
-						if(dis<=md){
+	function (player, op, damage) {
+		if (Math.random() <= 0.25) {
+			addEffect(player, 1, 500, false, [0, 75, 2]);
+		}
+		return damage
+	},
+	TeslaChestplate: function (player, op, damage) {
+
+		md = 700;
+		if (Math.random() <= 0.1) {
+			czap = []
+			for (p of players) {
+				if (op != p) {
+					dis = Math.dist(p.pos, op.pos)
+
+						if (dis <= md) {
 							czap.push(p);
 						}
-					}
-				    
 				}
-				for(o of obs){
-	                dis=Math.dist(op.pos,o.pos)
-					
-					if(dis<=md){
+
+			}
+			for (o of obs) {
+				dis = Math.dist(op.pos, o.pos)
+
+					if (dis <= md) {
 						czap.push(o);
 					}
-				    
-				}
-				zap=[]
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				if(czap.length>0){
-					var rand = czap[Math.floor(Math.random() * czap.length)];
-					index = czap.indexOf(rand);
-					czap.splice(index, 1);
-					zap.push(rand);
-				}
-				
-				
-				points=[]
-				
-				for(z of zap){
-					bolt=[];
-					bolt.push(op.pos)
-					
-					mid=[(op.pos[0]+z.pos[0])/2,(op.pos[1]+z.pos[1])/2]
-					mid=[mid[0]+((Math.random() - 0.5) * 150),mid[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(mid)
-					
-					midu=[(op.pos[0]+mid[0])/2,(op.pos[1]+mid[1])/2]
-					midu=[midu[0]+((Math.random() - 0.5) * 150),midu[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midu)
-					
-					midd=[(mid[0]+z.pos[0])/2,(mid[1]+z.pos[1])/2]
-					midd=[midd[0]+((Math.random() - 0.5) * 150),midd[1]+((Math.random() - 0.5) * 150)]
-					bolt.push(midd)
-					
-				    bolt.push(z.pos)
-					points.push(bolt)
-					
-					if(z.hasOwnProperty("name")){
-						dirDamage(z,20,op.id);
-					}else{
-						damageShape(z,op,20,false)
-					}
-				}
-				
-				addEffect("map", 2, 500,true,points);
-				
-				
+
 			}
-			return damage;
-	   }
-	
+			zap = []
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			if (czap.length > 0) {
+				var rand = czap[Math.floor(Math.random() * czap.length)];
+				index = czap.indexOf(rand);
+				czap.splice(index, 1);
+				zap.push(rand);
+			}
+
+			points = []
+
+			for (z of zap) {
+				bolt = [];
+				bolt.push(op.pos)
+
+				mid = [(op.pos[0] + z.pos[0]) / 2, (op.pos[1] + z.pos[1]) / 2]
+				mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(mid)
+
+				midu = [(op.pos[0] + mid[0]) / 2, (op.pos[1] + mid[1]) / 2]
+				midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midu)
+
+				midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
+				midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
+				bolt.push(midd)
+
+				bolt.push(z.pos)
+				points.push(bolt)
+
+				if (z.hasOwnProperty("name")) {
+					dirDamage(z, 20, op.id);
+				} else {
+					damageShape(z, op, 20, false)
+				}
+			}
+
+			addEffect("map", 2, 500, true, points);
+
+		}
+		return damage;
+	}
+
 }
 for (var i = 0; i < (numobs * 0.4); i++) {
 	nx = Math.floor((Math.random() * maplimitx));
@@ -1428,71 +1418,102 @@ urt = function () {
 			}
 		}
 }
-addEffect = function (player, eid, duration,stack,extra=[]) {
-	if(player!="map"){
-		ind="n";
-		if(!stack){
-			for(e of player.effects){
-				if(e[0]==eid){ind=player.effects.indexOf(e)}
+addEffect = function (player, eid, duration, stack, extra = []) {
+	if (player != "map") {
+		ind = "n";
+		if (!stack) {
+			for (e of player.effects) {
+				if (e[0] == eid) {
+					ind = player.effects.indexOf(e)
+				}
 				break
 			}
 		}
-			if(ind=="n"){
-				if(extra.length!=0){
-					player.effects.push([eid, duration, duration,extra]);
-				}else{player.effects.push([eid, duration, duration]);}
-				io.emit("effect", [player.id, eid, duration]);
-			}else{
-				if(extra.length!=0){
-					player.effects[ind]=[eid, duration, duration,extra];
-				}else{player.effects.push([eid, duration, duration]);}
-				io.emit("effect", [player.id, eid, duration]);
+		if (ind == "n") {
+			if (extra.length != 0) {
+				player.effects.push([eid, duration, duration, extra]);
+			} else {
+				player.effects.push([eid, duration, duration]);
 			}
-	}else{
-		io.emit("meffect", [eid,duration,extra]);
+			io.emit("effect", [player.id, eid, duration]);
+		} else {
+			if (extra.length != 0) {
+				player.effects[ind] = [eid, duration, duration, extra];
+			} else {
+				player.effects.push([eid, duration, duration]);
+			}
+			io.emit("effect", [player.id, eid, duration]);
+		}
+	} else {
+		io.emit("meffect", [eid, duration, extra]);
 	}
-	
+
 }
 
-shapeEffect = function (shape, eid, duration,stack,extra=[]) {
-	if(shape!="map"){
-		ind="n";
-		if(!stack){
-			for(e of shape.effects){
-				if(e[0]==eid){ind=shape.effects.indexOf(e)}
+shapeEffect = function (shape, eid, duration, stack, extra = []) {
+	if (shape != "map") {
+		ind = "n";
+		if (!stack) {
+			for (e of shape.effects) {
+				if (e[0] == eid) {
+					ind = shape.effects.indexOf(e)
+				}
 				break
 			}
 		}
-			if(ind=="n"){
-				if(extra.length!=0){
-					shape.effects.push([eid, duration, duration,extra]);
-				}else{shape.effects.push([eid, duration, duration]);}
-				io.emit("seffect", [shape.id, eid, duration]);
-			}else{
-				if(extra.length!=0){
-					shape.effects[ind]=[eid, duration, duration,extra];
-				}else{shape.effects.push([eid, duration, duration]);}
-				io.emit("seffect", [shape.id, eid, duration]);
+		if (ind == "n") {
+			if (extra.length != 0) {
+				shape.effects.push([eid, duration, duration, extra]);
+			} else {
+				shape.effects.push([eid, duration, duration]);
 			}
-	}else{
-		io.emit("meffect", [eid,duration,extra]);
+			io.emit("seffect", [shape.id, eid, duration]);
+		} else {
+			if (extra.length != 0) {
+				shape.effects[ind] = [eid, duration, duration, extra];
+			} else {
+				shape.effects.push([eid, duration, duration]);
+			}
+			io.emit("seffect", [shape.id, eid, duration]);
+		}
+	} else {
+		io.emit("meffect", [eid, duration, extra]);
 	}
-	
+
 }
-hasAbil=function(player,abil){
+hasAbil = function (player, abil) {
 	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
-			if(un==abil){return true}
+				if (un == abil) {
+					return true
+				}
 		}
 	}
-	
+
 	return false
 }
 setInterval(urt, 10000)
 io.sockets.on('connection', function (socket, username) {
 	socket.emit("items", [helmets, chest, boots, weapons]);
 	socket.on('newplayer', function (info) {
+		if (players.indexOf(socket) != -1) {//no double-joining
+			
+				console.log(socket.name + "is a hackster!");
+				if (players.includes(socket)) {
+					index = players.indexOf(socket);
+					players.splice(index, 1);
+				}
+				socket.disconnect(0);
+
+				io.emit("delplayer", socket.id);
+				
+				calcLeaderboard();
+			
+		}
+		if (info[0] == "") {
+			info[0] = "Player";
+		}
 		socket.name = info[0];
 		socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
 		socket.direction = 0
@@ -1535,13 +1556,13 @@ io.sockets.on('connection', function (socket, username) {
 		}
 		console.log(info[0] + " has joined, with " + socket.money + " money");
 		calcStats(socket);
-		
+
 		every = [];
 		for (player of players) {
 			every.push({
 				id: player.id,
 				effects: player.effects,
-				
+
 				facing: player.facing,
 				name: player.name,
 				pos: player.pos,
@@ -1554,27 +1575,27 @@ io.sockets.on('connection', function (socket, username) {
 				weapon: player.weapon.name
 			});
 		}
-        cobs = [];
+		cobs = [];
 		for (ob of obs) {
 			cobs.push({
 				id: ob.id,
-				effects: ob.effects,			
+				effects: ob.effects,
 				pos: ob.pos,
 				health: ob.health,
-                type:ob.type
+				type: ob.type
 			});
 		}
-        cprojs = [];
+		cprojs = [];
 		for (p of projs) {
 			cprojs.push({
-				id: p.id,						
+				id: p.id,
 				pos: p.pos,
 				ang: p.direction,
-                type:p.type
+				type: p.type
 			});
 		}
-        io.emit("newplayer",[socket.id,socket.pos,socket.name])
-		socket.emit("all", [every,cobs,cprojs,socket.id,socket.money]);
+		io.emit("newplayer", [socket.id, socket.pos, socket.name])
+		socket.emit("all", [every, cobs, cprojs, socket.id, socket.money]);
 		calcLeaderboard();
 	});
 	socket.on('dchange', function (newd) {
@@ -1590,8 +1611,8 @@ io.sockets.on('connection', function (socket, username) {
 			socket.actspeed = Math.min(newd[1], 1);
 	});
 	socket.on('buyitem', function (iname) {
-        item=undefined
-		iname = iname.replace(/\s+/g, '');
+		item = undefined
+			iname = iname.replace(/\s+/g, '');
 		if (helmets.hasOwnProperty(iname)) {
 			z = 'helmet';
 			item = helmets[iname];
@@ -1611,7 +1632,7 @@ io.sockets.on('connection', function (socket, username) {
 			}
 		};
 		if (socket.money >= item.cost) {
-			changeMoney(socket,-item.cost)
+			changeMoney(socket, -item.cost)
 			if (z == "helmet") {
 				socket.helmet = item;
 			} else if (z == "chest") {
@@ -1627,7 +1648,7 @@ io.sockets.on('connection', function (socket, username) {
 			if (player.chealth > player.mhealth) {
 				player.chealth = player.mhealth;
 			}
-			io.emit("echange", [socket.id, item.name,z]);
+			io.emit("echange", [socket.id, item.name, z]);
 		}
 	});
 	socket.on('astart', function (info) {
@@ -1643,7 +1664,7 @@ io.sockets.on('connection', function (socket, username) {
 			players.splice(index, 1);
 		}
 		socket.disconnect(0);
-		
+
 		io.emit("delplayer", socket.id);
 		ff(rj);
 		calcLeaderboard();
