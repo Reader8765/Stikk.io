@@ -40,6 +40,7 @@ update = function () {
 		for (f of ob.effects) {
 			if (f[0] == 1) {
 				if (f[3][0] >= f[3][1]) {
+					
 					damageShape(ob, f[3][3], f[3][2], false)
 					f[3][0] = 0;
 
@@ -143,10 +144,10 @@ update = function () {
 				if (f[3][0] >= f[3][1]) {
 
 					f[3][0] = 0;
+					
 					dirDamage(player, f[3][2], f[3][3])
 				} else {
 					f[3][0] += 1;
-
 				}
 
 			}
@@ -193,7 +194,7 @@ update = function () {
 							inter2 = false
 						};
 						if (inter1 || inter2) {
-							doDamage(player, op, true);
+							doDamage(player, op, true,player.damage);
 						}
 					}
 				}
@@ -389,7 +390,7 @@ function remProj(proj) {
 function doDamage(player, op, abil, d) {
 	player.hasHit.push(op);
 	op.ld = player.id;
-	d = d || Math.max(player.damage - (Math.max(op.armor - player.armorp, 0)), 0);
+	d = Math.max(d - (Math.max(op.armor - player.armorp, 0)), 0);
 
 	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
@@ -815,6 +816,7 @@ var weapons = {
 	BasicBow: {
 		name: "Basic Bow",
 		damage: 1,
+		aspeed:-3,
 		type: "Ranged",
 		cost: 10,
 		range: 750,
@@ -1043,14 +1045,14 @@ onHit = {
 	Torch:
 	function (player, op) {
 		if (Math.random() <= 0.25) {
-			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+			addEffect(op, 1, 500, false, [0, 75, 4, player.id]);
 		}
 	},
 	BlazingSword:
 	function (player, op) {
 
 		if (Math.random() <= 0.25) {
-			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+			addEffect(op, 1, 500, false, [0, 75, 6, player.id]);
 		}
 	},
 	TeslaSword:
@@ -1222,13 +1224,13 @@ onShapeHit = {
 	BlazingSword:
 	function (player, ob) {
 		if (Math.random() <= 0.25) {
-			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+			shapeEffect(ob, 1, 500, false, [0, 75, 6, player.id]);
 		}
 	},
 	Torch:
 	function (player, ob) {
 		if (Math.random() <= 0.25) {
-			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+			shapeEffect(ob, 1, 500, false, [0, 75, 4, player.id]);
 		}
 	},
 }
@@ -1497,10 +1499,12 @@ setInterval(urt, 10000)
 io.sockets.on('connection', function (socket, username) {
 	socket.emit("items", [helmets, chest, boots, weapons]);
 	socket.on('newplayer', function (info) {
+		var canJoin=true;
 		if (players.indexOf(socket) != -1) {//no double-joining
 			
-				console.log(socket.name + "is a hackster!");
-				if (players.includes(socket)) {
+				console.log(socket.name + " is a hackster!");
+				canJoin=false;
+				/*if (players.includes(socket)) {
 					index = players.indexOf(socket);
 					players.splice(index, 1);
 				}
@@ -1508,95 +1512,98 @@ io.sockets.on('connection', function (socket, username) {
 
 				io.emit("delplayer", socket.id);
 				
-				calcLeaderboard();
+				calcLeaderboard();*/
 			
 		}
-		if (info[0] == "") {
-			info[0] = "Player";
-		}
-		socket.name = info[0];
-		socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
-		socket.direction = 0
-			socket.actspeed = 1;
-		socket.chealth = 100;
-		socket.attacking = !1;
-		socket.anim = 0;
-		socket.attackdel = 0;
-		socket.attackspeed = 10;
-		socket.value = 0;
-		socket.ld = "none";
-		socket.id = Math.random();
-		socket.rect = {
-			right: 0,
-			left: 0,
-			top: 0,
-			bottom: 0
-		};
-		socket.facing = "right";
-		socket.money = 0;
-		socket.hasHit = [];
-		socket.rdelay = 0;
-		socket.weapon = false;
-		socket.chest = false;
-		socket.helmet = false;
-		socket.boots = false;
-		socket.dt = [];
-		socket.rt = 0;
-		socket.regen = 10;
-		socket.effects = [];
-		players[players.length] = socket;
-		if (info[1]) {
-			for (r of rjoin) {
-				if (r[0] == info[1]) {
-					socket.money = r[1];
-					index = players.indexOf(r);
-					rjoin.splice(index, 1);
+		if (canJoin){
+			if (info[0] == "") {
+				info[0] = "Player";
+			}
+			socket.name = info[0];
+			socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
+			socket.direction = 0
+				socket.actspeed = 1;
+			socket.chealth = 100;
+			socket.attacking = !1;
+			socket.anim = 0;
+			socket.attackdel = 0;
+			socket.attackspeed = 10;
+			socket.value = 0;
+			socket.ld = "none";
+			socket.id = Math.random();
+			socket.rect = {
+				right: 0,
+				left: 0,
+				top: 0,
+				bottom: 0
+			};
+			socket.facing = "right";
+			socket.money = 990;
+			socket.hasHit = [];
+			socket.hasBought=[];
+			socket.rdelay = 0;
+			socket.weapon = false;
+			socket.chest = false;
+			socket.helmet = false;
+			socket.boots = false;
+			socket.dt = [];
+			socket.rt = 0;
+			socket.regen = 10;
+			socket.effects = [];
+			players[players.length] = socket;
+			if (info[1]) {
+				for (r of rjoin) {
+					if (r[0] == info[1]) {
+						socket.money = r[1];
+						index = players.indexOf(r);
+						rjoin.splice(index, 1);
+					}
 				}
 			}
-		}
-		console.log(info[0] + " has joined, with " + socket.money + " money");
-		calcStats(socket);
+			console.log(info[0] + " has joined, with " + socket.money + " money");
+			calcStats(socket);
 
-		every = [];
-		for (player of players) {
-			every.push({
-				id: player.id,
-				effects: player.effects,
+			every = [];
+			for (player of players) {
+				every.push({
+					id: player.id,
+					effects: player.effects,
 
-				facing: player.facing,
-				name: player.name,
-				pos: player.pos,
-				mhealth: player.mhealth,
-				chealth: player.chealth,
-				anim: player.anim,
-				helmet: player.helmet.name,
-				chest: player.chest.name,
-				boots: player.boots.name,
-				weapon: player.weapon.name
-			});
+					facing: player.facing,
+					name: player.name,
+					pos: player.pos,
+					mhealth: player.mhealth,
+					chealth: player.chealth,
+					anim: player.anim,
+					helmet: player.helmet.name,
+					chest: player.chest.name,
+					boots: player.boots.name,
+					weapon: player.weapon.name
+				});
+			}
+			cobs = [];
+			for (ob of obs) {
+				cobs.push({
+					id: ob.id,
+					effects: ob.effects,
+					pos: ob.pos,
+					health: ob.health,
+					type: ob.type
+				});
+			}
+			cprojs = [];
+			for (p of projs) {
+				cprojs.push({
+					id: p.id,
+					pos: p.pos,
+					ang: p.direction,
+					type: p.type
+				});
+			}
+			io.emit("newplayer", [socket.id, socket.pos, socket.name])
+			socket.emit("all", [every, cobs, cprojs, socket.id, socket.money]);
+			calcLeaderboard();
 		}
-		cobs = [];
-		for (ob of obs) {
-			cobs.push({
-				id: ob.id,
-				effects: ob.effects,
-				pos: ob.pos,
-				health: ob.health,
-				type: ob.type
-			});
-		}
-		cprojs = [];
-		for (p of projs) {
-			cprojs.push({
-				id: p.id,
-				pos: p.pos,
-				ang: p.direction,
-				type: p.type
-			});
-		}
-		io.emit("newplayer", [socket.id, socket.pos, socket.name])
-		socket.emit("all", [every, cobs, cprojs, socket.id, socket.money]);
-		calcLeaderboard();
 	});
 	socket.on('dchange', function (newd) {
 		socket.direction = newd[0];
@@ -1631,8 +1638,16 @@ io.sockets.on('connection', function (socket, username) {
 				cost: 9999999
 			}
 		};
-		if (socket.money >= item.cost) {
-			changeMoney(socket, -item.cost)
+		var toPay=item.cost;
+		if (socket.hasBought.includes(item.name)){
+				//already owned, no need to pay
+				toPay=0;
+		}
+		if (socket.money >= toPay) {
+			
+			changeMoney(socket, -toPay);
+			socket.hasBought.push(item.name);
+			
 			if (z == "helmet") {
 				socket.helmet = item;
 			} else if (z == "chest") {
@@ -1642,13 +1657,17 @@ io.sockets.on('connection', function (socket, username) {
 			} else if (z == "weapon") {
 				socket.weapon = item;
 			}
-			socket.chealth += (item.health != undefined ? item.health : 0)
-			console.log(socket.name + " bought: " + item.name);
+			var healthMod=(item.health != undefined ? item.health : 0)
+			var healthPerc=socket.chealth/socket.mhealth;
 			calcStats(socket);
+			socket.chealth = int(socket.mhealth*healthPerc);
+			console.log(socket.name + " bought: " + item.name);
+			
 			if (player.chealth > player.mhealth) {
 				player.chealth = player.mhealth;
 			}
-			io.emit("echange", [socket.id, item.name, z]);
+			var curDamage=socket.mhealth-socket.chealth;
+			io.emit("echange", [socket.id, item.name, z,socket.mhealth,curDamage]);
 		}
 	});
 	socket.on('astart', function (info) {
