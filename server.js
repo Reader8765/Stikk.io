@@ -60,7 +60,7 @@ update = function () {
 
 	}
 	pi = []
-	rem = []
+	rem = [];
 	projLoop:
 	for (proj of projs) {
 		proj.pos[0] += proj.vel[0];
@@ -610,8 +610,8 @@ function changeMoney(player, changeBy) {
 }
 function calcStats(player) {
 	oldv = int(player.value);
-	oldMon = int(player.money)
-		player.speed = 10;
+	oldMon = int(player.money);
+	player.speed = 10;
 	player.mhealth = 100;
 	player.attackspeed = 10;
 	player.damage = 10;
@@ -619,21 +619,26 @@ function calcStats(player) {
 	player.armor = 0;
 	player.regen = 10;
 	player.value = 0;
-	player.atype = "Melee"
-		for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
-			if (mine) {
-				player.speed += (mine.speed != undefined ? mine.speed : 0)
-				player.damage += (mine.damage != undefined ? mine.damage : 0)
-				player.attackspeed += (mine.aspeed != undefined ? mine.aspeed : 0)
-				player.armorp += (mine.armorp != undefined ? mine.armorp : 0)
-				player.armor += (mine.armor != undefined ? mine.armor : 0)
-				player.mhealth += (mine.health != undefined ? mine.health : 0)
-				player.regen += (mine.regen != undefined ? mine.regen : 0)
-				player.value += mine.cost;
-				player.atype = (mine.type != undefined ? mine.type : "Melee")
-			}
+	player.atype = "Melee";
+	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
+		if (mine) {
+			player.speed += (mine.speed != undefined ? mine.speed : 0)
+			player.damage += (mine.damage != undefined ? mine.damage : 0)
+			player.attackspeed += (mine.aspeed != undefined ? mine.aspeed : 0)
+			player.armorp += (mine.armorp != undefined ? mine.armorp : 0)
+			player.armor += (mine.armor != undefined ? mine.armor : 0)
+			player.mhealth += (mine.health != undefined ? mine.health : 0)
+			player.regen += (mine.regen != undefined ? mine.regen : 0)
+			
+			player.atype = (mine.type != undefined ? mine.type : "Melee")
 		}
-		player.value += player.money;
+	}
+	player.value += player.maxCost["chest"];
+	player.value += player.maxCost["helmet"];
+	player.value += player.maxCost["boots"];
+	player.value += player.maxCost["weapon"];
+
+	player.value += player.money;
 	if (player.value != oldv) {
 		calcLeaderboard();
 
@@ -1546,6 +1551,12 @@ io.sockets.on('connection', function (socket, username) {
 			socket.chest = false;
 			socket.helmet = false;
 			socket.boots = false;
+			socket.maxCost={
+				"boots":0,
+				"weapon":0,
+				"helmet":0,
+				"chest":0,
+			}
 			socket.dt = [];
 			socket.rt = 0;
 			socket.regen = 10;
@@ -1659,6 +1670,9 @@ io.sockets.on('connection', function (socket, username) {
 			}
 			var healthMod=(item.health != undefined ? item.health : 0)
 			var healthPerc=socket.chealth/socket.mhealth;
+			if (item.cost>socket.maxCost[z]){
+				socket.maxCost[z]=item.cost;
+			};
 			calcStats(socket);
 			socket.chealth = int(socket.mhealth*healthPerc);
 			console.log(socket.name + " bought: " + item.name);
