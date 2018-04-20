@@ -1650,14 +1650,25 @@ io.sockets.on('connection', function (socket, username) {
 			}
 		};
 		var toPay=item.cost;
-		if (socket.hasBought.includes(item.name)){
+		try {
+			if (socket.hasBought.includes(item.name)){
 				//already owned, no need to pay
 				toPay=0;
+			}
+		} catch (error) {
+			console.log("The error occured!");
+			console.log("hasBought=");
+			console.log(socket.hasBought);
+			console.log("item=");
+			console.log(item);
 		}
+		
 		if (socket.money >= toPay) {
 			
 			changeMoney(socket, -toPay);
-			socket.hasBought.push(item.name);
+			//if (!socket.hasBought.includes(item.name)){
+				socket.hasBought.push(item.name);
+		//	}
 			
 			if (z == "helmet") {
 				socket.helmet = item;

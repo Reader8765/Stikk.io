@@ -1,0 +1,4 @@
+if (socket.hasBought.includes(item.name)){
+
+    TypeError: Cannot read property 'includes' of undefined
+    at Socket.<anonymous> (/opt/app-root/src/server.js:1653:23)
