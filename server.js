@@ -1629,8 +1629,9 @@ io.sockets.on('connection', function (socket, username) {
 			socket.actspeed = Math.min(newd[1], 1);
 	});
 	socket.on('buyitem', function (iname) {
-		item = undefined
-			iname = iname.replace(/\s+/g, '');
+		
+		item = undefined;
+		iname = iname.replace(/\s+/g, '');
 		if (helmets.hasOwnProperty(iname)) {
 			z = 'helmet';
 			item = helmets[iname];
@@ -1655,12 +1656,16 @@ io.sockets.on('connection', function (socket, username) {
 				//already owned, no need to pay
 				toPay=0;
 			}
+			
 		} catch (error) {
 			console.log("The error occured!");
+			error.log(error);
 			console.log("hasBought=");
 			console.log(socket.hasBought);
 			console.log("item=");
 			console.log(item);
+			console.log("socket=");
+			console.log(socket);
 		}
 		
 		if (socket.money >= toPay) {
@@ -1688,8 +1693,8 @@ io.sockets.on('connection', function (socket, username) {
 			socket.chealth = int(socket.mhealth*healthPerc);
 			console.log(socket.name + " bought: " + item.name);
 			
-			if (player.chealth > player.mhealth) {
-				player.chealth = player.mhealth;
+			if (socket.chealth > socket.mhealth) {
+				socket.chealth = socket.mhealth;
 			}
 			var curDamage=socket.mhealth-socket.chealth;
 			io.emit("echange", [socket.id, item.name, z,socket.mhealth,curDamage]);
