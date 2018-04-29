@@ -1659,7 +1659,7 @@ io.sockets.on('connection', function (socket, username) {
 			
 		} catch (error) {
 			console.log("The error occured!");
-			error.log(error);
+			console.log(error);
 			console.log("hasBought=");
 			console.log(socket.hasBought);
 			console.log("item=");
