@@ -29,7 +29,7 @@ function debug(info) {
 	addEffect("map", "debug", 5, 1, info)
 }
 function isOutOfBounds(x, y) {
-	return x > maplimitx || y > maplimity || x < 0 || x < 0;
+	return x > maplimitx || y > maplimity || x < 0 || y < 0;
 }
 function isSwordSwinging(player) {
 	return (!(!player.attacking && player.attackdel == 0))
