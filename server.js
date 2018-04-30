@@ -1662,10 +1662,24 @@ io.sockets.on('connection', function (socket, username) {
 			console.log(error);
 			console.log("hasBought=");
 			console.log(socket.hasBought);
+			console.log("name=");
+			console.log(socket.name);
+			console.log("chest=");
+			console.log(socket.chest);
+			console.log("helmet=");
+			console.log(socket.helmet);
+			console.log("weapon=");
+			console.log(socket.weapon);
+			console.log("boots=");
+			console.log(socket.boots);
+			console.log("money=");
+			console.log(socket.money);
+			console.log("maxCost=");
+			console.log(socket.maxCost);
 			console.log("item=");
 			console.log(item);
-			console.log("socket=");
-			console.log(socket);
+			
+			
 		}
 		
 		if (socket.money >= toPay) {
