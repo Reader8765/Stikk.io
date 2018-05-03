@@ -431,7 +431,7 @@ ff = function (rid) {
 		}
 	}
 }
-damageShape = function (shape, player, da, abil) {
+var damageShape = function (shape, player, da, abil) {
 	shape.health -= da;
 	if (abil) {
 		for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
@@ -455,7 +455,7 @@ damageShape = function (shape, player, da, abil) {
 		});
 	}
 }
-spawnShape = function (old, player) {
+var spawnShape = function (old, player) {
 	oldt = old.type;
 
 	if (oldt == 1) {
@@ -1009,14 +1009,14 @@ var boots = {
 		image: "ameriboots",
 		wid: 50
 	},
-	WeirdBoots: {
+	/*WeirdBoots: {
 		name: "Weird Boots",
 		speed: 5,
 		armor: 1,
 		cost: 50,
 		image: "weirdboot",
 		wid: 50
-	},
+	},*/
 	KnightBoots: {
 		name: "Knight Boots",
 		speed: 1,
