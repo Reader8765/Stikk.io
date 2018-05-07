@@ -576,8 +576,8 @@ function kill(dead) {
 	io.emit("delplayer", dead.id);
 }
 function calcLeaderboard() {
-	topNum = 3
-		leaders = players.slice();
+	var topNum = 3;
+	leaders = players.slice();
 	leaders.sort(function (a, b) {
 		return a.value - b.value;
 	})
@@ -587,7 +587,7 @@ function calcLeaderboard() {
 	for (l of leaders) {
 		leadd.push([l.name, l.value]);
 	}
-	io.emit("leaderboard", leadd)
+	io.emit("leaderboard", leadd);
 }
 Math.dist = function (pos1, pos2) {
 	x1 = pos1[0]
@@ -1525,6 +1525,8 @@ io.sockets.on('connection', function (socket, username) {
 				info[0] = "Player";
 			}
 			socket.name = info[0];
+			//var hash=require('crypto').createHash('md5').update(socket.name).digest("hex");
+			//console.log(hash);
 			socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
 			socket.direction = 0
 				socket.actspeed = 1;
@@ -1619,7 +1621,7 @@ io.sockets.on('connection', function (socket, username) {
 	socket.on('dchange', function (newd) {
 		socket.direction = newd[0];
 		d = -newd[0]
-			upt = d < 90 && d > 0
+			upt = d < 90 && d >= 0
 			dnt = d > 270 && d < 360
 			if (upt || dnt) {
 				socket.facing = "right"
