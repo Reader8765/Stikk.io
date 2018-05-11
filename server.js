@@ -3,15 +3,15 @@ var fs = require('fs');
 
 var pp = [[27, -32], [27, -32], [28, -31], [28, -31], [29, -30], [30, -30], [30, -29], [31, -28], [31, -28], [32, -27], [32, -27], [32, -26], [33, -26], [33, -25], [34, -24], [34, -24], [35, -23], [35, -23], [35, -22], [36, -21], [36, -21], [37, -20], [37, -19], [37, -19], [38, -18], [38, -17], [38, -17], [39, -16], [39, -15], [39, -15], [39, -14], [40, -13], [40, -13], [40, -12], [40, -11], [40, -10], [41, -10], [41, -9], [41, -8], [41, -8], [41, -7], [41, -6], [42, -5], [42, -5], [42, -4], [42, -3], [42, -2], [42, -2], [42, -1], [42, 0], [42, 0], [42, 0], [42, 1], [42, 2], [42, 2], [42, 3], [42, 4], [42, 5], [42, 5], [41, 6], [41, 7], [41, 8], [41, 8], [41, 9], [41, 10], [40, 10], [40, 11], [40, 12], [40, 13], [40, 13], [39, 14], [39, 15], [39, 15], [39, 16], [38, 17], [38, 17], [38, 18], [37, 19], [37, 19], [37, 20], [36, 21], [36, 21], [35, 22], [35, 23], [35, 23], [34, 24], [34, 24], [33, 25], [33, 26], [32, 26], [32, 27], [32, 27], [31, 28], [31, 28], [30, 29], [30, 30], [29, 30], [28, 31], [28, 31], [27, 32], [27, 32], [26, -32]];
 var server = http.createServer(function (req, res) {
-		fs.readFile('./index.html', 'utf-8', function (error, content) {
-			res.writeHead(200, {
-				"Content-Type": "text/html"
-			});
-			res.end(content);
+	fs.readFile('./index.html', 'utf-8', function (error, content) {
+		res.writeHead(200, {
+			"Content-Type": "text/html"
 		});
+		res.end(content);
 	});
+});
 
-redirectToUpdate = function () {
+function redirectToUpdate() {
 
 	update();
 
@@ -34,13 +34,13 @@ function isOutOfBounds(x, y) {
 function isSwordSwinging(player) {
 	return (!(!player.attacking && player.attackdel == 0))
 }
-update = function () {
+function update() {
 
 	for (ob of obs) {
 		for (f of ob.effects) {
 			if (f[0] == 1) {
 				if (f[3][0] >= f[3][1]) {
-					
+
 					damageShape(ob, f[3][3], f[3][2], false)
 					f[3][0] = 0;
 
@@ -68,32 +68,32 @@ update = function () {
 		proj.traveled += proj.speed;
 		pi.push([proj.id, proj.pos])
 		player = proj.shotby
-			proj.hitpos = [proj.pos[0] + proj.hitoff[0], proj.pos[1] + proj.hitoff[1]]
-			if (isOutOfBounds(proj.hitpos[0], proj.hitpos[1])) {
+		proj.hitpos = [proj.pos[0] + proj.hitoff[0], proj.pos[1] + proj.hitoff[1]]
+		if (isOutOfBounds(proj.hitpos[0], proj.hitpos[1])) {
+			rem.push(proj)
+			continue projLoop;
+		}
+		if (proj.traveled > proj.range) {
+			rem.push(proj)
+			continue projLoop;
+		}
+		for (ob of obs) {
+			inter = intersectPoint(proj.hitpos, ob.rect);
+			if (inter) {
+				damageShape(ob, player, proj.damage, true)
 				rem.push(proj)
 				continue projLoop;
-			}
-			if (proj.traveled > proj.range) {
-				rem.push(proj)
-				continue projLoop;
-			}
-			for (ob of obs) {
-				inter = intersectPoint(proj.hitpos, ob.rect);
-				if (inter) {
-					damageShape(ob, player, proj.damage, true)
-					rem.push(proj)
-					continue projLoop;
 
-				}
 			}
-			for (op of players) {
-				inter = intersectPoint(proj.hitpos, op.rect);
-				if (inter) {
-					doDamage(player, op, true, proj.damage)
-					rem.push(proj)
-					continue projLoop;
-				}
+		}
+		for (op of players) {
+			inter = intersectPoint(proj.hitpos, op.rect);
+			if (inter) {
+				doDamage(player, op, true, proj.damage)
+				rem.push(proj)
+				continue projLoop;
 			}
+		}
 
 	}
 	for (r of rem) {
@@ -108,21 +108,21 @@ update = function () {
 			if (player.direction > -90) {
 
 				aangle = 50 - Math.abs(int(player.direction))
-					aangle = Math.min(Math.max(aangle, 0), 100)
+				aangle = Math.min(Math.max(aangle, 0), 100)
 			} else if (player.direction < -270) {
 
 				aangle = 51 - (Math.abs((int(player.direction))) - 360)
-					aangle = Math.min(Math.max(aangle, 0), 100)
+				aangle = Math.min(Math.max(aangle, 0), 100)
 			} else { // if (player.direction<-131 && player.direction>-232)
 
 				aangle = (Math.abs((int(player.direction))) - 108) - 24
 				aangle = Math.min(Math.max(aangle, 0), 100)
 			}
 			player.anim = aangle
-				aangle = aangle + 40
-				if (player.facing == "left") {
-					aangle = 360 - aangle
-				}
+			aangle = aangle + 40
+			if (player.facing == "left") {
+				aangle = 360 - aangle
+			}
 
 		}
 		var speedMod;
@@ -144,7 +144,7 @@ update = function () {
 				if (f[3][0] >= f[3][1]) {
 
 					f[3][0] = 0;
-					
+
 					dirDamage(player, f[3][2], f[3][3])
 				} else {
 					f[3][0] += 1;
@@ -194,7 +194,7 @@ update = function () {
 							inter2 = false
 						};
 						if (inter1 || inter2) {
-							doDamage(player, op, true,player.damage);
+							doDamage(player, op, true, player.damage);
 						}
 					}
 				}
@@ -392,21 +392,21 @@ function doDamage(player, op, abil, d) {
 	op.ld = player.id;
 	d = Math.max(d - (Math.max(op.armor - player.armorp, 0)), 0);
 
-	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
+	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
-				if (onHit.hasOwnProperty(un)) {
+			if (onHit.hasOwnProperty(un)) {
 
-					onHit[un](player, op);
-				}
+				onHit[un](player, op);
+			}
 		}
 	}
-	for (mine of[op.helmet, op.chest, op.boots, op.weapon]) {
+	for (mine of [op.helmet, op.chest, op.boots, op.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
-				if (onAttacked.hasOwnProperty(un)) {
-					d = onAttacked[un](player, op, d);
-				}
+			if (onAttacked.hasOwnProperty(un)) {
+				d = onAttacked[un](player, op, d);
+			}
 		}
 
 	}
@@ -421,26 +421,26 @@ function dirDamage(player, da, id) {
 	player.ld = id;
 	io.emit("healthchange", [player.id, player.chealth])
 }
-ff = function (rid) {
+function ff(rid) {
 	if (rid) {
 		for (r of rjoin) {
 			if (r[0] == rid) {
-				index = players.indexOf(r);
+				index = rjoin.indexOf(r);
 				rjoin.splice(index, 1);
 			}
 		}
 	}
 }
-var damageShape = function (shape, player, da, abil) {
+function damageShape(shape, player, da, abil) {
 	shape.health -= da;
 	if (abil) {
-		for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
+		for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 			if (mine) {
 				un = mine.name.replace(/\s+/g, '')
-					if (onShapeHit.hasOwnProperty(un)) {
+				if (onShapeHit.hasOwnProperty(un)) {
 
-						onShapeHit[un](player, shape);
-					}
+					onShapeHit[un](player, shape);
+				}
 			}
 		}
 	}
@@ -455,7 +455,7 @@ var damageShape = function (shape, player, da, abil) {
 		});
 	}
 }
-var spawnShape = function (old, player) {
+function spawnShape(old, player) {
 	oldt = old.type;
 
 	if (oldt == 1) {
@@ -561,7 +561,7 @@ function kill(dead) {
 			killer = player
 		}
 	}
-	if (typeof player === 'number') {}
+	if (typeof player === 'number') { }
 	else {
 		changeMoney(killer, int(dead.value / 2))
 	}
@@ -582,7 +582,7 @@ function calcLeaderboard() {
 		return a.value - b.value;
 	})
 	leaders = leaders.slice(Math.max(leaders.length - topNum, 0))
-		leaders.reverse();
+	leaders.reverse();
 	leadd = [];
 	for (l of leaders) {
 		leadd.push([l.name, l.value]);
@@ -591,12 +591,12 @@ function calcLeaderboard() {
 }
 Math.dist = function (pos1, pos2) {
 	x1 = pos1[0]
-		x2 = pos2[0]
-		y1 = pos1[1]
-		y2 = pos2[1]
+	x2 = pos2[0]
+	y1 = pos1[1]
+	y2 = pos2[1]
 
-		var xs = x2 - x1,
-	ys = y2 - y1;
+	var xs = x2 - x1,
+		ys = y2 - y1;
 
 	xs *= xs;
 	ys *= ys;
@@ -629,7 +629,7 @@ function calcStats(player) {
 			player.armor += (mine.armor != undefined ? mine.armor : 0)
 			player.mhealth += (mine.health != undefined ? mine.health : 0)
 			player.regen += (mine.regen != undefined ? mine.regen : 0)
-			
+
 			player.atype = (mine.type != undefined ? mine.type : "Melee")
 		}
 	}
@@ -821,7 +821,7 @@ var weapons = {
 	BasicBow: {
 		name: "Basic Bow",
 		damage: 1,
-		aspeed:-3,
+		aspeed: -3,
 		type: "Ranged",
 		cost: 10,
 		range: 750,
@@ -1042,221 +1042,221 @@ onHit = {
 		}
 	},
 	Candlestick:
-	function (player, op) {
-		if (Math.random() <= 0.25) {
-			addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
-		}
-	},
+		function (player, op) {
+			if (Math.random() <= 0.25) {
+				addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
+			}
+		},
 	Torch:
-	function (player, op) {
-		if (Math.random() <= 0.25) {
-			addEffect(op, 1, 500, false, [0, 75, 4, player.id]);
-		}
-	},
+		function (player, op) {
+			if (Math.random() <= 0.25) {
+				addEffect(op, 1, 500, false, [0, 75, 4, player.id]);
+			}
+		},
 	BlazingSword:
-	function (player, op) {
+		function (player, op) {
 
-		if (Math.random() <= 0.25) {
-			addEffect(op, 1, 500, false, [0, 75, 6, player.id]);
-		}
-	},
+			if (Math.random() <= 0.25) {
+				addEffect(op, 1, 500, false, [0, 75, 6, player.id]);
+			}
+		},
 	TeslaSword:
-	function (player, op) {
+		function (player, op) {
 
-		md = 700;
-		if (Math.random() <= 0.2) {
-			czap = []
-			for (p of players) {
-				if (player != p) {
-					dis = Math.dist(p.pos, op.pos)
+			md = 700;
+			if (Math.random() <= 0.2) {
+				czap = []
+				for (p of players) {
+					if (player != p) {
+						dis = Math.dist(p.pos, op.pos)
 
 						if (dis <= md) {
 							czap.push(p);
 						}
-				}
+					}
 
-			}
-			for (o of obs) {
-				dis = Math.dist(op.pos, o.pos)
+				}
+				for (o of obs) {
+					dis = Math.dist(op.pos, o.pos)
 
 					if (dis <= md) {
 						czap.push(o);
 					}
 
-			}
-			zap = []
-
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-
-			points = []
-
-			for (z of zap) {
-				bolt = [];
-				bolt.push(op.pos)
-
-				mid = [(op.pos[0] + z.pos[0]) / 2, (op.pos[1] + z.pos[1]) / 2]
-				mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(mid)
-
-				midu = [(op.pos[0] + mid[0]) / 2, (op.pos[1] + mid[1]) / 2]
-				midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(midu)
-
-				midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
-				midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(midd)
-
-				bolt.push(z.pos)
-				points.push(bolt)
-
-				if (z.hasOwnProperty("name")) {
-					dirDamage(z, 20, player.id);
-				} else {
-					damageShape(z, player, 20, false)
 				}
-			}
+				zap = []
 
-			addEffect("map", 2, 500, true, points);
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+
+				points = []
+
+				for (z of zap) {
+					bolt = [];
+					bolt.push(op.pos)
+
+					mid = [(op.pos[0] + z.pos[0]) / 2, (op.pos[1] + z.pos[1]) / 2]
+					mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(mid)
+
+					midu = [(op.pos[0] + mid[0]) / 2, (op.pos[1] + mid[1]) / 2]
+					midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(midu)
+
+					midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
+					midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(midd)
+
+					bolt.push(z.pos)
+					points.push(bolt)
+
+					if (z.hasOwnProperty("name")) {
+						dirDamage(z, 20, player.id);
+					} else {
+						damageShape(z, player, 20, false)
+					}
+				}
+
+				addEffect("map", 2, 500, true, points);
+			}
 		}
-	}
 }
 
 onShapeHit = {
 	TeslaSword:
-	function (player, ob) {
+		function (player, ob) {
 
-		md = 700;
-		if (Math.random() <= 0.2) {
+			md = 700;
+			if (Math.random() <= 0.2) {
 
-			czap = []
-			for (p of players) {
-				if (player != p) {
-					dis = Math.dist(p.pos, ob.pos)
+				czap = []
+				for (p of players) {
+					if (player != p) {
+						dis = Math.dist(p.pos, ob.pos)
 
 						if (dis <= md) {
 
 							czap.push(p);
 						}
-				}
+					}
 
-			}
-			for (o of obs) {
-				dis = Math.dist(ob.pos, o.pos)
+				}
+				for (o of obs) {
+					dis = Math.dist(ob.pos, o.pos)
 
 					if (dis <= md) {
 						czap.push(o);
 					}
 
-			}
-			zap = []
-
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-
-			if (czap.length > 0) {
-				var rand = czap[Math.floor(Math.random() * czap.length)];
-				index = czap.indexOf(rand);
-				czap.splice(index, 1);
-				zap.push(rand);
-			}
-
-			points = []
-
-			for (z of zap) {
-				bolt = [];
-				bolt.push(ob.pos)
-
-				mid = [(ob.pos[0] + z.pos[0]) / 2, (ob.pos[1] + z.pos[1]) / 2]
-				mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(mid)
-
-				midu = [(ob.pos[0] + mid[0]) / 2, (ob.pos[1] + mid[1]) / 2]
-				midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(midu)
-
-				midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
-				midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
-				bolt.push(midd)
-
-				bolt.push(z.pos)
-				points.push(bolt)
-
-				if (z.hasOwnProperty("name")) {
-					dirDamage(z, 20, player.id)
-				} else {
-					damageShape(z, player, 20, false)
 				}
+				zap = []
+
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+
+				if (czap.length > 0) {
+					var rand = czap[Math.floor(Math.random() * czap.length)];
+					index = czap.indexOf(rand);
+					czap.splice(index, 1);
+					zap.push(rand);
+				}
+
+				points = []
+
+				for (z of zap) {
+					bolt = [];
+					bolt.push(ob.pos)
+
+					mid = [(ob.pos[0] + z.pos[0]) / 2, (ob.pos[1] + z.pos[1]) / 2]
+					mid = [mid[0] + ((Math.random() - 0.5) * 150), mid[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(mid)
+
+					midu = [(ob.pos[0] + mid[0]) / 2, (ob.pos[1] + mid[1]) / 2]
+					midu = [midu[0] + ((Math.random() - 0.5) * 150), midu[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(midu)
+
+					midd = [(mid[0] + z.pos[0]) / 2, (mid[1] + z.pos[1]) / 2]
+					midd = [midd[0] + ((Math.random() - 0.5) * 150), midd[1] + ((Math.random() - 0.5) * 150)]
+					bolt.push(midd)
+
+					bolt.push(z.pos)
+					points.push(bolt)
+
+					if (z.hasOwnProperty("name")) {
+						dirDamage(z, 20, player.id)
+					} else {
+						damageShape(z, player, 20, false)
+					}
+				}
+
+				addEffect("map", 2, 500, true, points);
+
 			}
-
-			addEffect("map", 2, 500, true, points);
-
-		}
-	},
+		},
 	Candlestick:
-	function (player, ob) {
-		if (Math.random() <= 0.25) {
-			shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
-		}
-	},
+		function (player, ob) {
+			if (Math.random() <= 0.25) {
+				shapeEffect(ob, 1, 500, false, [0, 75, 2, player.id]);
+			}
+		},
 	BlazingSword:
-	function (player, ob) {
-		if (Math.random() <= 0.25) {
-			shapeEffect(ob, 1, 500, false, [0, 75, 6, player.id]);
-		}
-	},
+		function (player, ob) {
+			if (Math.random() <= 0.25) {
+				shapeEffect(ob, 1, 500, false, [0, 75, 6, player.id]);
+			}
+		},
 	Torch:
-	function (player, ob) {
-		if (Math.random() <= 0.25) {
-			shapeEffect(ob, 1, 500, false, [0, 75, 4, player.id]);
-		}
-	},
+		function (player, ob) {
+			if (Math.random() <= 0.25) {
+				shapeEffect(ob, 1, 500, false, [0, 75, 4, player.id]);
+			}
+		},
 }
 
 onAttacked = {
 	ChainmailChestplate:
-	function (player, op, damage) {
+		function (player, op, damage) {
 
-		if (Math.random() <= 0.1) {
+			if (Math.random() <= 0.1) {
 
-			return 0
-		}
-		return damage
-	},
+				return 0
+			}
+			return damage
+		},
 	BlazingCloak:
-	function (player, op, damage) {
-		if (Math.random() <= 0.25) {
-			addEffect(player, 1, 500, false, [0, 75, 2]);
-		}
-		return damage
-	},
+		function (player, op, damage) {
+			if (Math.random() <= 0.25) {
+				addEffect(player, 1, 500, false, [0, 75, 2]);
+			}
+			return damage
+		},
 	TeslaChestplate: function (player, op, damage) {
 
 		md = 700;
@@ -1266,18 +1266,18 @@ onAttacked = {
 				if (op != p) {
 					dis = Math.dist(p.pos, op.pos)
 
-						if (dis <= md) {
-							czap.push(p);
-						}
+					if (dis <= md) {
+						czap.push(p);
+					}
 				}
 
 			}
 			for (o of obs) {
 				dis = Math.dist(op.pos, o.pos)
 
-					if (dis <= md) {
-						czap.push(o);
-					}
+				if (dis <= md) {
+					czap.push(o);
+				}
 
 			}
 			zap = []
@@ -1414,18 +1414,18 @@ for (var i = 0; i < (numobs * 0.1); i++) {
 	obs.push(nob);
 }
 setInterval(redirectToUpdate, 5);
-urt = function () {
-	len = rjoin.length
-		for (var i = 0; i < len; i++) {
-			r[2] += 1;
-			if (r[2] > 120) {
-				index = rjoin.indexOf(r);
-				rjoin.splice(index, 1);
-				len -= 1;
-			}
+function urt() {
+	len = rjoin.length;
+	for (var i = 0; i < len; i++) {
+		r[2] += 1;
+		if (r[2] > 120) {
+			index = rjoin.indexOf(r);
+			rjoin.splice(index, 1);
+			return;
 		}
+	}
 }
-addEffect = function (player, eid, duration, stack, extra = []) {
+function addEffect(player, eid, duration, stack, extra = []) {
 	if (player != "map") {
 		ind = "n";
 		if (!stack) {
@@ -1457,7 +1457,7 @@ addEffect = function (player, eid, duration, stack, extra = []) {
 
 }
 
-shapeEffect = function (shape, eid, duration, stack, extra = []) {
+function shapeEffect(shape, eid, duration, stack, extra = []) {
 	if (shape != "map") {
 		ind = "n";
 		if (!stack) {
@@ -1486,15 +1486,14 @@ shapeEffect = function (shape, eid, duration, stack, extra = []) {
 	} else {
 		io.emit("meffect", [eid, duration, extra]);
 	}
-
 }
-hasAbil = function (player, abil) {
-	for (mine of[player.helmet, player.chest, player.boots, player.weapon]) {
+function hasAbil(player, abil) {
+	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
-				if (un == abil) {
-					return true
-				}
+			if (un == abil) {
+				return true
+			}
 		}
 	}
 
@@ -1504,23 +1503,23 @@ setInterval(urt, 10000)
 io.sockets.on('connection', function (socket, username) {
 	socket.emit("items", [helmets, chest, boots, weapons]);
 	socket.on('newplayer', function (info) {
-		var canJoin=true;
+		var canJoin = true;
 		if (players.indexOf(socket) != -1) {//no double-joining
-			
-				console.log(socket.name + " is a hackster!");
-				canJoin=false;
-				/*if (players.includes(socket)) {
-					index = players.indexOf(socket);
-					players.splice(index, 1);
-				}
-				socket.disconnect(0);
 
-				io.emit("delplayer", socket.id);
-				
-				calcLeaderboard();*/
+			console.log(socket.name + " is a hackster!");
+			canJoin = false;
+			/*if (players.includes(socket)) {
+				index = players.indexOf(socket);
+				players.splice(index, 1);
+			}
+			socket.disconnect(0);
+
+			io.emit("delplayer", socket.id);
 			
+			calcLeaderboard();*/
+
 		}
-		if (canJoin){
+		if (canJoin) {
 			if (info[0] == "") {
 				info[0] = "Player";
 			}
@@ -1529,7 +1528,7 @@ io.sockets.on('connection', function (socket, username) {
 			//console.log(hash);
 			socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
 			socket.direction = 0
-				socket.actspeed = 1;
+			socket.actspeed = 1;
 			socket.chealth = 100;
 			socket.attacking = !1;
 			socket.anim = 0;
@@ -1537,6 +1536,9 @@ io.sockets.on('connection', function (socket, username) {
 			socket.attackspeed = 10;
 			socket.value = 0;
 			socket.ld = "none";
+			//socket.availBoost=1000;
+			//socket.maxBoost=1000;
+			
 			socket.id = Math.random();
 			socket.rect = {
 				right: 0,
@@ -1547,17 +1549,17 @@ io.sockets.on('connection', function (socket, username) {
 			socket.facing = "right";
 			socket.money = 0;
 			socket.hasHit = [];
-			socket.hasBought=[];
+			socket.hasBought = [];
 			socket.rdelay = 0;
 			socket.weapon = false;
 			socket.chest = false;
 			socket.helmet = false;
 			socket.boots = false;
-			socket.maxCost={
-				"boots":0,
-				"weapon":0,
-				"helmet":0,
-				"chest":0,
+			socket.maxCost = {
+				"boots": 0,
+				"weapon": 0,
+				"helmet": 0,
+				"chest": 0,
 			}
 			socket.dt = [];
 			socket.rt = 0;
@@ -1620,18 +1622,23 @@ io.sockets.on('connection', function (socket, username) {
 	});
 	socket.on('dchange', function (newd) {
 		socket.direction = newd[0];
-		d = -newd[0]
-			upt = d < 90 && d >= 0
-			dnt = d > 270 && d < 360
-			if (upt || dnt) {
-				socket.facing = "right"
-			} else if (d !== 0) {
-				socket.facing = "left"
-			}
-			socket.actspeed = Math.min(newd[1], 1);
+		d = -newd[0];
+		upt = d < 90 && d >= 0
+		dnt = d > 270 && d < 360
+		if (upt || dnt) {
+			socket.facing = "right"
+		} else if (d !== 0) {
+			socket.facing = "left"
+		}
+		socket.actspeed = Math.min(newd[1], 1);
 	});
 	socket.on('buyitem', function (iname) {
-		
+		if (typeof socket.name === "undefined") {
+			console.log("undefined socket send.");
+			console.log("connected:");
+			console.log(socket.connected);
+			return;
+		};
 		item = undefined;
 		iname = iname.replace(/\s+/g, '');
 		if (helmets.hasOwnProperty(iname)) {
@@ -1652,13 +1659,13 @@ io.sockets.on('connection', function (socket, username) {
 				cost: 9999999
 			}
 		};
-		var toPay=item.cost;
+		var toPay = item.cost;
 		try {
-			if (socket.hasBought.includes(item.name)){
+			if (socket.hasBought.includes(item.name)) {
 				//already owned, no need to pay
-				toPay=0;
+				toPay = 0;
 			}
-			
+
 		} catch (error) {
 			console.log("The error occured!");
 			console.log(error);
@@ -1680,17 +1687,17 @@ io.sockets.on('connection', function (socket, username) {
 			console.log(socket.maxCost);
 			console.log("item=");
 			console.log(item);
-			
-			
+
+
 		}
-		
+
 		if (socket.money >= toPay) {
-			
+
 			changeMoney(socket, -toPay);
 			//if (!socket.hasBought.includes(item.name)){
-				socket.hasBought.push(item.name);
-		//	}
-			
+			socket.hasBought.push(item.name);
+			//	}
+
 			if (z == "helmet") {
 				socket.helmet = item;
 			} else if (z == "chest") {
@@ -1700,20 +1707,20 @@ io.sockets.on('connection', function (socket, username) {
 			} else if (z == "weapon") {
 				socket.weapon = item;
 			}
-			var healthMod=(item.health != undefined ? item.health : 0)
-			var healthPerc=socket.chealth/socket.mhealth;
-			if (item.cost>socket.maxCost[z]){
-				socket.maxCost[z]=item.cost;
+			var healthMod = (item.health != undefined ? item.health : 0)
+			var healthPerc = socket.chealth / socket.mhealth;
+			if (item.cost > socket.maxCost[z]) {
+				socket.maxCost[z] = item.cost;
 			};
 			calcStats(socket);
-			socket.chealth = int(socket.mhealth*healthPerc);
+			socket.chealth = int(socket.mhealth * healthPerc);
 			console.log(socket.name + " bought: " + item.name);
-			
+
 			if (socket.chealth > socket.mhealth) {
 				socket.chealth = socket.mhealth;
 			}
-			var curDamage=socket.mhealth-socket.chealth;
-			io.emit("echange", [socket.id, item.name, z,socket.mhealth,curDamage]);
+			var curDamage = socket.mhealth - socket.chealth;
+			io.emit("echange", [socket.id, item.name, z, socket.mhealth, curDamage]);
 		}
 	});
 	socket.on('astart', function (info) {
