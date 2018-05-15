@@ -99,7 +99,7 @@ function update() {
 	for (r of rem) {
 		remProj(r)
 	}
-	spi = []
+	var spi = []
 	for (player of players) {
 		if (player.atype == "Melee") {
 			player.anim = Math.round(player.attackdel / 10);
@@ -130,9 +130,25 @@ function update() {
 			speedMod = 0.5;
 		} else {
 			speedMod = 1;
+		};
+
+		var boostMod = 1;
+		if (player.boosting) {
+			if (player.availBoost > 0) {
+				boostMod += (player.boostSpeed / 10);
+				player.availBoost -= 2;
+				player.emit("boostchange", player.availBoost);
+			}
 		}
-		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180) * speedMod;
-		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180) * speedMod;
+		else {
+			if (player.availBoost < player.maxBoost) {
+				player.availBoost += 0.00025 * player.maxBoost;
+				player.emit("boostchange", player.availBoost);
+			}
+		}
+
+		xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180) * speedMod * boostMod;
+		ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180) * speedMod * boostMod;
 		donef = []
 		for (f of player.effects) {
 			if (f[0] == 0) {
@@ -314,7 +330,7 @@ function update() {
 			left: player.pos[0] - 40,
 			right: player.pos[0] + 40,
 		};
-		spi.push([player.id, [Math.round(player.pos[0]), Math.round(player.pos[1])], player.facing, player.anim]);
+		spi.push([player.id, [Math.round(player.pos[0]), Math.round(player.pos[1])], player.facing, player.anim, boostMod > 1]);
 
 		if (player.chealth <= 0) {
 			kill(player, op)
@@ -614,10 +630,12 @@ function calcStats(player) {
 	player.speed = 10;
 	player.mhealth = 100;
 	player.attackspeed = 10;
+	player.boostSpeed = 5;
 	player.damage = 10;
 	player.armorp = 0;
 	player.armor = 0;
 	player.regen = 10;
+	player.maxBoost = calcBoost(player);
 	player.value = 0;
 	player.atype = "Melee";
 	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
@@ -629,20 +647,32 @@ function calcStats(player) {
 			player.armor += (mine.armor != undefined ? mine.armor : 0)
 			player.mhealth += (mine.health != undefined ? mine.health : 0)
 			player.regen += (mine.regen != undefined ? mine.regen : 0)
-
+			player.boostSpeed += (mine.boostSpeed != undefined ? mine.boostSpeed : 0)
+			player.maxBoost += (mine.boosttime != undefined ? mine.boosttime * 10 : 0)
 			player.atype = (mine.type != undefined ? mine.type : "Melee")
 		}
 	}
-	player.value += player.maxCost["chest"];
-	player.value += player.maxCost["helmet"];
-	player.value += player.maxCost["boots"];
-	player.value += player.maxCost["weapon"];
+	player.value += player.totalItemCosts;
+
 
 	player.value += player.money;
 	if (player.value != oldv) {
 		calcLeaderboard();
+	};
 
+	if (player.availBoost > player.maxBoost) {
+		player.availBoost = player.maxBoost;
 	}
+
+
+}
+function calcBoost(player) {
+	var b = 1000;//1000
+	b -= player.maxCost["chest"];
+	b -= player.maxCost["helmet"];
+	b -= player.maxCost["boots"];
+	b -= player.maxCost["weapon"];
+	return b;
 }
 var maplimitx = 7500;
 var maplimity = 4500;
@@ -692,7 +722,7 @@ var chest = {
 		name: "Spy Cloak",
 		health: 31,
 		armor: 4,
-		speed: 1,
+		boostSpeed: 1,
 		cost: 50,
 		wid: 50,
 		image: "knightchestplate"
@@ -712,7 +742,7 @@ var chest = {
 		name: "Elven Cloak",
 		health: 65,
 		armor: 3,
-		speed: 2,
+		boosttime: 7,
 		regen: 2,
 		cost: 70,
 		wid: 50,
@@ -743,7 +773,7 @@ var chest = {
 		armor: 3,
 		cost: 100,
 		wid: 50,
-		speed: 1,
+		boostSpeed: 1,
 		image: "knightchestplate",
 		st: "Your ranged weapons do 20% more damage."
 	},
@@ -755,7 +785,6 @@ var chest = {
 		cost: 120,
 		wid: 50,
 		image: "knightchestplate"
-
 	},
 	BlazingCloak: {
 		name: "Blazing Cloak",
@@ -1001,7 +1030,7 @@ var weapons = {
 	 */
 };
 var boots = {
-	Ameriboots: {
+	/*Ameriboots: {
 		name: "Ameriboots",
 		speed: 3,
 		armor: 2,
@@ -1017,16 +1046,45 @@ var boots = {
 		image: "weirdboot",
 		wid: 50
 	},*/
+	//(10*boosttime+(1000-4*cost))*(5+0.boostspeed)
 	KnightBoots: {
 		name: "Knight Boots",
-		speed: 1,
-		armor: 1,
-		cost: 10,
+		armor: 3,
+		boosttime:8,
+		cost: 60,
 		image: "knightboot",
+		wid: 50,
+		by: 5,
+	},
+	VineShoes: {
+		name: "Vine Shoes",
+		boosttime:1,
+		boostSpeed:1,
+		regen:1,
+		cost: 12,
+		image: "vineboots",
+		by: 20,
 		wid: 50
-	}
+	},
+	LeatherBoots:{
+		name: "Leather Boots",
+		boosttime:3,
+		cost: 10,
+		image: "leatherboots",
+		wid: 40,
+		by: 4,
+	},
+	ElvenBoots:{
+		name: "Elven Boots",
+		boosttime:13,
+		boostSpeed:4,
+		cost: 85,
+		image: "elvenboots",
+		wid: 50,
+		by: 4,
+	},
 }
-onHit = {
+var onHit = {
 	WoodenClub: function (player, op) {
 		plus = (hasAbil(player, "GoldenCloak") ? 0.1 : 0);
 
@@ -1253,7 +1311,7 @@ onAttacked = {
 	BlazingCloak:
 		function (player, op, damage) {
 			if (Math.random() <= 0.25) {
-				addEffect(player, 1, 500, false, [0, 75, 2]);
+				addEffect(player, 1, 500, false, [0, 75, 6]);
 			}
 			return damage
 		},
@@ -1456,7 +1514,12 @@ function addEffect(player, eid, duration, stack, extra = []) {
 	}
 
 }
-
+function startBoost(player) {
+	player.boosting = true;
+};
+function endBoost(player) {
+	player.boosting = false;
+};
 function shapeEffect(shape, eid, duration, stack, extra = []) {
 	if (shape != "map") {
 		ind = "n";
@@ -1527,18 +1590,21 @@ io.sockets.on('connection', function (socket, username) {
 			//var hash=require('crypto').createHash('md5').update(socket.name).digest("hex");
 			//console.log(hash);
 			socket.pos = [Math.floor((Math.random() * maplimitx)), Math.floor((Math.random() * maplimity))];
-			socket.direction = 0
+			socket.direction = 0;
 			socket.actspeed = 1;
 			socket.chealth = 100;
-			socket.attacking = !1;
+			socket.attacking = false;
 			socket.anim = 0;
 			socket.attackdel = 0;
 			socket.attackspeed = 10;
 			socket.value = 0;
 			socket.ld = "none";
-			//socket.availBoost=1000;
-			//socket.maxBoost=1000;
-			
+
+			socket.availBoost = 1000;
+			socket.maxBoost = 1000;
+			socket.boostSpeed = 5;
+			socket.boosting = false;
+
 			socket.id = Math.random();
 			socket.rect = {
 				right: 0,
@@ -1561,11 +1627,12 @@ io.sockets.on('connection', function (socket, username) {
 				"helmet": 0,
 				"chest": 0,
 			}
+			socket.totalItemCosts = 0;
 			socket.dt = [];
 			socket.rt = 0;
 			socket.regen = 10;
 			socket.effects = [];
-			players[players.length] = socket;
+			players.push(socket);
 			if (info[1]) {
 				for (r of rjoin) {
 					if (r[0] == info[1]) {
@@ -1577,7 +1644,7 @@ io.sockets.on('connection', function (socket, username) {
 			}
 			console.log(info[0] + " has joined, with " + socket.money + " money");
 			calcStats(socket);
-
+			socket.availBoost = socket.maxBoost;
 			every = [];
 			for (player of players) {
 				every.push({
@@ -1616,7 +1683,7 @@ io.sockets.on('connection', function (socket, username) {
 				});
 			}
 			io.emit("newplayer", [socket.id, socket.pos, socket.name])
-			socket.emit("all", [every, cobs, cprojs, socket.id, socket.money]);
+			socket.emit("all", [every, cobs, cprojs, socket.id, socket.money, socket.maxBoost]);
 			calcLeaderboard();
 		}
 	});
@@ -1709,6 +1776,7 @@ io.sockets.on('connection', function (socket, username) {
 			}
 			var healthMod = (item.health != undefined ? item.health : 0)
 			var healthPerc = socket.chealth / socket.mhealth;
+			socket.totalItemCosts += toPay;
 			if (item.cost > socket.maxCost[z]) {
 				socket.maxCost[z] = item.cost;
 			};
@@ -1721,13 +1789,21 @@ io.sockets.on('connection', function (socket, username) {
 			}
 			var curDamage = socket.mhealth - socket.chealth;
 			io.emit("echange", [socket.id, item.name, z, socket.mhealth, curDamage]);
+			player.emit("maxboost", [player.maxBoost, player.availBoost]);
+
 		}
 	});
 	socket.on('astart', function (info) {
 		socket.attacking = !0;
 	});
 	socket.on('aend', function (info) {
-		socket.attacking = !1
+		socket.attacking = !1;
+	});
+	socket.on('booststart', function (info) {
+		startBoost(socket);
+	});
+	socket.on('boostend', function (info) {
+		endBoost(socket);
 	});
 	socket.on('disconnect', function (rj) {
 		console.log(socket.name + " quit.");
