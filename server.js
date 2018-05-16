@@ -443,6 +443,7 @@ function ff(rid) {
 			if (r[0] == rid) {
 				index = rjoin.indexOf(r);
 				rjoin.splice(index, 1);
+				break;
 			}
 		}
 	}
@@ -1637,7 +1638,7 @@ io.sockets.on('connection', function (socket, username) {
 				for (r of rjoin) {
 					if (r[0] == info[1]) {
 						socket.money = r[1];
-						index = players.indexOf(r);
+						index = rjoin.indexOf(r);
 						rjoin.splice(index, 1);
 					}
 				}
@@ -1789,7 +1790,7 @@ io.sockets.on('connection', function (socket, username) {
 			}
 			var curDamage = socket.mhealth - socket.chealth;
 			io.emit("echange", [socket.id, item.name, z, socket.mhealth, curDamage]);
-			player.emit("maxboost", [player.maxBoost, player.availBoost]);
+			socket.emit("maxboost", [socket.maxBoost, socket.availBoost]);
 
 		}
 	});
