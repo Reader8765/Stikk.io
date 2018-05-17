@@ -707,7 +707,7 @@ var chest = {
 		armor: 3,
 		cost: 20,
 		wid: 50,
-		image: "knightchestplate"
+		image: "farmershirt"
 	},
 	//T3
 	MossCape: {
@@ -716,7 +716,7 @@ var chest = {
 		regen: 1,
 		cost: 30,
 		wid: 50,
-		image: "knightchestplate"
+		image: "mosscape"
 	},
 	//T4
 	SpyCloak: {
@@ -726,7 +726,7 @@ var chest = {
 		boostSpeed: 1,
 		cost: 50,
 		wid: 50,
-		image: "knightchestplate"
+		image: "spycloak"
 	},
 	SkeletonSuit: {
 		name: "Skeleton Suit",
@@ -736,7 +736,7 @@ var chest = {
 		regen: 4,
 		cost: 50,
 		wid: 50,
-		image: "knightchestplate"
+		image: "skeletonsuit"
 	},
 	//T5
 	ElvenCloak: {
@@ -747,7 +747,7 @@ var chest = {
 		regen: 2,
 		cost: 70,
 		wid: 50,
-		image: "knightchestplate"
+		image: "elvencloak"
 	},
 	ChainmailChestplate: {
 		name: "Chainmail Chestplate",
@@ -755,7 +755,7 @@ var chest = {
 		armor: 10,
 		cost: 70,
 		wid: 50,
-		image: "knightchestplate",
+		image: "chainmailchestplate",
 		st: "10% chance of taking 0 damage."
 	},
 
@@ -775,7 +775,7 @@ var chest = {
 		cost: 100,
 		wid: 50,
 		boostSpeed: 1,
-		image: "knightchestplate",
+		image: "archercloak",
 		st: "Your ranged weapons do 20% more damage."
 	},
 	//T7
@@ -785,7 +785,7 @@ var chest = {
 		armor: 8,
 		cost: 120,
 		wid: 50,
-		image: "knightchestplate"
+		image: "armyjacket"
 	},
 	BlazingCloak: {
 		name: "Blazing Cloak",
@@ -793,7 +793,7 @@ var chest = {
 		armor: 8,
 		cost: 120,
 		wid: 50,
-		image: "knightchestplate",
+		image: "blazingcloak",
 		st: "When you are hit by a melee weapon, there is a 25% chance attacker is lit on fire."
 	},
 	//T9
@@ -803,7 +803,7 @@ var chest = {
 		armor: 9,
 		cost: 200,
 		wid: 50,
-		image: "knightchestplate",
+		image: "teslachestplate",
 		st: "When you are attacked, 10% chance to zap 3 nearby shapes or players for 20 damage."
 	},
 	GoldenCloak: {
@@ -812,7 +812,7 @@ var chest = {
 		armor: 6,
 		cost: 220,
 		wid: 50,
-		image: "knightchestplate",
+		image: "goldencloak",
 		st: "Your stun abilities have 10% greater chance to activate."
 	},
 	//T10
@@ -822,7 +822,7 @@ var chest = {
 		armor: 25,
 		cost: 300,
 		wid: 50,
-		image: "knightchestplate",
+		image: "chestplateofglory",
 
 	},
 
