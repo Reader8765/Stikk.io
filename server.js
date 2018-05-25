@@ -16,6 +16,18 @@ function redirectToUpdate() {
 	update();
 
 }
+function regenPlayer(player,amnt){
+	if(player.chealth<player.mhealth){
+		player.chealth += amnt;
+		if(player.chealth>player.mhealth){
+			player.chealth=player.mhealth+0;
+		}
+		io.emit("healthchange", [player.id, player.chealth])
+	}
+}
+function randomChance(chance){
+	return Math.random()<chance;
+}
 function intersectRect(r1, r2) {
 	return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
 }
@@ -701,13 +713,14 @@ var helmets = {
 var chest = {
 
 	//T2
-	FarmerShirt: {
-		name: "Farmer Shirt",
+	LeatherShirt: {
+		name: "Leather Shirt",
 		health: 10,
 		armor: 3,
 		cost: 20,
-		wid: 50,
-		image: "farmershirt"
+		wid: 40,
+		by: 0,
+		image: "leathershirt"
 	},
 	//T3
 	MossCape: {
@@ -716,7 +729,9 @@ var chest = {
 		regen: 1,
 		cost: 30,
 		wid: 50,
-		image: "mosscape"
+		by: 15,
+		image: "mosscape",
+		imageback: "mosscapeback"
 	},
 	//T4
 	SpyCloak: {
@@ -726,6 +741,7 @@ var chest = {
 		boostSpeed: 1,
 		cost: 50,
 		wid: 50,
+		by: 0,
 		image: "spycloak"
 	},
 	SkeletonSuit: {
@@ -736,6 +752,7 @@ var chest = {
 		regen: 4,
 		cost: 50,
 		wid: 50,
+		by: 0,
 		image: "skeletonsuit"
 	},
 	//T5
@@ -747,6 +764,7 @@ var chest = {
 		regen: 2,
 		cost: 70,
 		wid: 50,
+		by: 0,
 		image: "elvencloak"
 	},
 	ChainmailChestplate: {
@@ -755,6 +773,7 @@ var chest = {
 		armor: 10,
 		cost: 70,
 		wid: 50,
+		by: 0,
 		image: "chainmailchestplate",
 		st: "10% chance of taking 0 damage."
 	},
@@ -766,6 +785,7 @@ var chest = {
 		armor: 15,
 		cost: 100,
 		wid: 50,
+		by: 0,
 		image: "knightchestplate"
 	},
 	ArcherCloak: {
@@ -776,6 +796,7 @@ var chest = {
 		wid: 50,
 		boostSpeed: 1,
 		image: "archercloak",
+		by: 0,
 		st: "Your ranged weapons do 20% more damage."
 	},
 	//T7
@@ -785,6 +806,7 @@ var chest = {
 		armor: 8,
 		cost: 120,
 		wid: 50,
+		by: 0,
 		image: "armyjacket"
 	},
 	BlazingCloak: {
@@ -793,6 +815,7 @@ var chest = {
 		armor: 8,
 		cost: 120,
 		wid: 50,
+		by: 0,
 		image: "blazingcloak",
 		st: "When you are hit by a melee weapon, there is a 25% chance attacker is lit on fire."
 	},
@@ -803,6 +826,7 @@ var chest = {
 		armor: 9,
 		cost: 200,
 		wid: 50,
+		by: 0,
 		image: "teslachestplate",
 		st: "When you are attacked, 10% chance to zap 3 nearby shapes or players for 20 damage."
 	},
@@ -812,6 +836,7 @@ var chest = {
 		armor: 6,
 		cost: 220,
 		wid: 50,
+		by: 0,
 		image: "goldencloak",
 		st: "Your stun abilities have 10% greater chance to activate."
 	},
@@ -819,9 +844,10 @@ var chest = {
 	ChestplateOfGlory: {
 		name: "Chestplate Of Glory",
 		health: 329,
-		armor: 25,
+		armor: 21,
 		cost: 300,
 		wid: 50,
+		by: 0,
 		image: "chestplateofglory",
 
 	},
@@ -859,7 +885,8 @@ var weapons = {
 		image: "bow",
 		ammolen: 70,
 		len: 80,
-		offx: -20
+		offx: -20,
+		dispDist: 0,
 	},
 	Candlestick: {
 		name: "Candlestick",
@@ -1015,8 +1042,34 @@ var weapons = {
 		cost: 200,
 		image: "trident",
 		len: 150
-	}
+	},
 	//T10
+	Flamethrower: {
+		name: "Flamethrower",
+		damage: 5,
+		aspeed: 53,//21
+		armorp: 10,
+		type: "Ranged",
+		cost: 300,
+		range: 300,
+		projSpeed: 5,
+		image: "flamethrower",
+		st: "Lights stuff on fire when attacking.",
+		ammolen: 67,
+		len: 50,
+		dispDist: 100,
+		offx: -20
+	},
+	VampiricSword: {
+		name: "Vampiric Sword",
+		aspeed: 4,
+		damage: 40,
+		armorp: 7,
+		type: "Melee",
+		cost: 300,
+		image: "vampiricsword",
+		len: 100
+	},
 	/*GoldenClub: {
 	name: "Golden Club",
 	aspeed: -4,
@@ -1027,8 +1080,8 @@ var weapons = {
 	image: "goldenclub",
 	len: 85
 	}
-	/*
-	 */
+	*/
+
 };
 var boots = {
 	/*Ameriboots: {
@@ -1051,7 +1104,7 @@ var boots = {
 	KnightBoots: {
 		name: "Knight Boots",
 		armor: 3,
-		boosttime:8,
+		boosttime: 8,
 		cost: 60,
 		image: "knightboot",
 		wid: 50,
@@ -1059,26 +1112,26 @@ var boots = {
 	},
 	VineShoes: {
 		name: "Vine Shoes",
-		boosttime:1,
-		boostSpeed:1,
-		regen:1,
+		boosttime: 1,
+		boostSpeed: 1,
+		regen: 1,
 		cost: 12,
 		image: "vineboots",
 		by: 20,
 		wid: 50
 	},
-	LeatherBoots:{
+	LeatherBoots: {
 		name: "Leather Boots",
-		boosttime:3,
+		boosttime: 3,
 		cost: 10,
 		image: "leatherboots",
 		wid: 40,
 		by: 4,
 	},
-	ElvenBoots:{
+	ElvenBoots: {
 		name: "Elven Boots",
-		boosttime:13,
-		boostSpeed:4,
+		boosttime: 13,
+		boostSpeed: 4,
 		cost: 85,
 		image: "elvenboots",
 		wid: 50,
@@ -1100,8 +1153,14 @@ var onHit = {
 			addEffect(op, 0, 200, true);
 		}
 	},
+	VampiricSword: function (player, op) {
+		if(randomChance(0.25)){
+			regenPlayer(player,40);
+		}
+	
+	},
 	Candlestick:
-		function (player, op) {
+        function (player, op) {
 			if (Math.random() <= 0.25) {
 				addEffect(op, 1, 500, false, [0, 75, 2, player.id]);
 			}
@@ -1118,6 +1177,10 @@ var onHit = {
 			if (Math.random() <= 0.25) {
 				addEffect(op, 1, 500, false, [0, 75, 6, player.id]);
 			}
+		},
+	Flamethrower:
+		function (player, op) {
+			addEffect(op, 1, 500, false, [0, 75, 14, player.id]);
 		},
 	TeslaSword:
 		function (player, op) {
@@ -1296,6 +1359,11 @@ onShapeHit = {
 			if (Math.random() <= 0.25) {
 				shapeEffect(ob, 1, 500, false, [0, 75, 4, player.id]);
 			}
+		},
+	Flamethrower:
+		function (player, ob) {
+
+			shapeEffect(ob, 1, 500, false, [0, 75, 14, player.id]);
 		},
 }
 
@@ -1504,6 +1572,9 @@ function addEffect(player, eid, duration, stack, extra = []) {
 			io.emit("effect", [player.id, eid, duration]);
 		} else {
 			if (extra.length != 0) {
+				if (eid == 1) {
+					extra[0] = player.effects[ind][3][0];
+				}
 				player.effects[ind] = [eid, duration, duration, extra];
 			} else {
 				player.effects.push([eid, duration, duration]);
@@ -1541,6 +1612,9 @@ function shapeEffect(shape, eid, duration, stack, extra = []) {
 			io.emit("seffect", [shape.id, eid, duration]);
 		} else {
 			if (extra.length != 0) {
+				if (eid == 1) {
+					extra[0] = shape.effects[ind][3][0];
+				}
 				shape.effects[ind] = [eid, duration, duration, extra];
 			} else {
 				shape.effects.push([eid, duration, duration]);
@@ -1614,7 +1688,7 @@ io.sockets.on('connection', function (socket, username) {
 				bottom: 0
 			};
 			socket.facing = "right";
-			socket.money = 0;
+			socket.money = 0;//changemoney
 			socket.hasHit = [];
 			socket.hasBought = [];
 			socket.rdelay = 0;
