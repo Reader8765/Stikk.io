@@ -1067,6 +1067,7 @@ var weapons = {
 		armorp: 7,
 		type: "Melee",
 		cost: 300,
+		st: "25% chance to heal 40 health when attacking a player.",
 		image: "vampiricsword",
 		len: 100
 	},
