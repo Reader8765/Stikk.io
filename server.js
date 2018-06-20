@@ -654,7 +654,9 @@ function kill(dead) {
 	if(killer){
 		changeMoney(killer, int(dead.value / 2))
 	}
-	killer={name:"Player"};
+	if(!killer){
+		killer={name:"Player"};
+	}
 
 	rdid = Math.random();
 	r = [rdid, int(dead.value / 2), 0];
