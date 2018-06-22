@@ -663,7 +663,6 @@ function kill(dead) {
 	rjoin.push(r);
 	console.log(dead.name + " has been killed by " + killer.name + ". They had " + dead.value + " value, so they will start with " + r[1] + " money.");
 	dead.emit("dead", [killer.name, [r[0], r[1]]]);
-
 	calcLeaderboard();
 	io.emit("delplayer", dead.id);
 }
