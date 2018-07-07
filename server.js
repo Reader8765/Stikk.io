@@ -99,7 +99,7 @@ function isSwordSwinging(player) {
 	return (!(!player.attacking && player.attackdel == 0))
 }
 function update() {
-	/*Uber-lag:*/ for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {}}}}}}
+	//*Uber-lag:*/ for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {}}}}}}
 	for (ob of obs) {
 		var donef=[];
 		for (f of ob.effects) {
