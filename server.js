@@ -57,8 +57,14 @@ function redirectToUpdate(){
 		}
 	}
 	//console.log("Interval:"+adjInterval)
+    if(adjInterval<=0){
+		setImmediate(redirectToUpdate);
+	}else{
+		setTimeout(redirectToUpdate, adjInterval);
+	}
 	
-	setTimeout(redirectToUpdate,adjInterval);
+	
+	
 }
 // redirectToUpdate starts at end of file
 
