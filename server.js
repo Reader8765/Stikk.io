@@ -22,38 +22,38 @@ Array.prototype.remove = function (element) {
 	this.splice(index, 1);
 }
 var present = require('present');
-var fps=200;
-var interval=1000/fps;
-var pVal=Math.min(10/fps,1);
-var adjInterval=interval+0;
-var badFrames=0;
-var wasSlow=false;
-function redirectToUpdate(){
-	
-	
-	var thisTime=present();
+var fps = 200;
+var interval = 1000 / fps;
+var pVal = Math.min(10 / fps, 1);
+var adjInterval = interval + 0;
+var badFrames = 0;
+var wasSlow = false;
+function redirectToUpdate() {
 
-	var diff=thisTime-lastTime;
-	lastTime=thisTime;
+
+	var thisTime = present();
+
+	var diff = thisTime - lastTime;
+	lastTime = thisTime;
 	update();
-	
-	var wentOver=interval-diff;
-	
+
+	var wentOver = interval - diff;
+
 	//console.log("Took:"+diff);
 	//console.log("Error:"+wentOver);
-	var idealInterval=adjInterval+(wentOver*pVal);
-	adjInterval=Math.max(0,idealInterval);
-	if(idealInterval>=0){
-		badFrames=0;
-		if(wasSlow){
-			console.log("Server no longer slowed. There are " +players.length+" players. It took "+diff+" to update. It should take "+interval+".");
-			wasSlow=false;
+	var idealInterval = adjInterval + (wentOver * pVal);
+	adjInterval = Math.max(0, idealInterval);
+	if (idealInterval >= 0) {
+		badFrames = 0;
+		if (wasSlow) {
+			console.log("Server no longer slowed. There are " + players.length + " players. It took " + diff + " to update. It should take " + interval + ".");
+			wasSlow = false;
 		}
-	}else{
-		badFrames+=1;
-		if(badFrames>=1000 && !wasSlow){
-			wasSlow=true;
-			console.log("Server Slowdown! There are " +players.length+" players. It took "+diff+" to update. It should take "+interval+".")
+	} else {
+		badFrames += 1;
+		if (badFrames >= 1000 && !wasSlow) {
+			wasSlow = true;
+			console.log("Server Slowdown! There are " + players.length + " players. It took " + diff + " to update. It should take " + interval + ".")
 		}
 	}
 	//console.log("Interval:"+adjInterval)
@@ -64,7 +64,7 @@ function redirectToUpdate(){
 	}
 	
 	
-	
+
 }
 // redirectToUpdate starts at end of file
 
@@ -101,7 +101,7 @@ function isSwordSwinging(player) {
 function update() {
 	//*Uber-lag:*/ for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {for (player of players) {}}}}}}
 	for (ob of obs) {
-		var donef=[];
+		var donef = [];
 		for (f of ob.effects) {
 			if (f[0] == 1) {
 				if (f[3][0] >= f[3][1]) {
@@ -166,7 +166,6 @@ function update() {
 	var spi = [];
 	var deadPlayers = [];
 	for (player of players) {
-		var slow=Math.pow(player.pos[0],9999)
 		if (player.atype == "Melee") {
 			player.anim = Math.round(player.attackdel / 10);
 		} else if (player.atype == "Ranged") {
@@ -185,7 +184,7 @@ function update() {
 				aangle = Math.min(Math.max(aangle, 0), 100)
 			}
 			player.anim = aangle
-			aangle = aangle + 40
+			aangle = aangle + 42
 			if (player.facing == "left") {
 				aangle = 360 - aangle
 			}
@@ -212,9 +211,17 @@ function update() {
 				player.emit("boostchange", player.availBoost);
 			}
 		}
-//to glicth collitsions, they mighjt? need to be both moving updawrd
-		var xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180) * speedMod * boostMod;
-		var ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180) * speedMod * boostMod;
+		var reloadMod = 1;
+		if(player.reloading){
+			player.reloadDelay+=1;
+			if(player.reloadDelay>=player.reloadTime){
+				player.reloading=false;
+				player.availAmmo=player.maxAmmo;
+			}
+			reloadMod = 0.1 
+		}
+		var xm = (player.speed / 10) * player.actspeed * Math.cos(player.direction * Math.PI / 180) * speedMod * boostMod * reloadMod;
+		var ym = (player.speed / 10) * player.actspeed * Math.sin(player.direction * Math.PI / 180) * speedMod * boostMod * reloadMod;
 		var donef = [];
 		var stunned = false;
 		for (f of player.effects) {
@@ -327,7 +334,7 @@ function update() {
 			}
 		} else if (player.atype == "Ranged") {
 
-			if (player.attacking) {
+			if (player.attacking && !player.reloading) {
 				if (player.attackdel == 0 && !stunned) {
 					pos = rotate_point(player.pos[0], -40 + player.pos[1], player.pos[0], player.pos[1], aangle);
 					pos = [pos.x, pos.y]
@@ -349,7 +356,7 @@ function update() {
 				var dx = player.pos[0] - op.pos[0];
 				var dy = player.pos[1] - op.pos[1];
 				if (Math.abs(dx) < ppminx && Math.abs(dy) < ppminy) {
-					if (dx  < 0) {
+					if (dx < 0) {
 						player.pos[0] += (Math.abs(dx) - ppminx);
 					} else {
 						player.pos[0] -= (Math.abs(dx) - ppminx);
@@ -454,13 +461,28 @@ function roundList(list) {
 		list[i] = Math.round(list[i])
 	}
 }
+function forceReload(player){
+	player.reloading=true;
+	player.reloadDelay=0;
+	io.emit("reload",[player.id,player.reloadTime])
+}
+function changeAmmo(player,changeBy){
+	player.availAmmo += changeBy;
+	player.emit("ammoAmount", player.availAmmo);
+	if (player.availAmmo <= 0) {
+		forceReload(player);
+		
+	}
+}
 function addProj(weapon, pos, ang, shotby) {
 	n = {
 		id: Math.random(),
 		type: weapon.name,
 		pos: pos,
 		ang: ang
-	}
+	};
+	
+	changeAmmo(player,-1);
 	io.emit("newproj", n);
 	n.shotby = shotby;
 	n.vel = [weapon.projSpeed * Math.sin(ang * Math.PI / 180), -weapon.projSpeed * Math.cos(ang * Math.PI / 180)]
@@ -639,7 +661,8 @@ function spawnShape(old, player) {
 
 	}
 	if (typeof player !== 'number') {//will happen if the player quit
-		changeMoney(player, old.money)}
+		changeMoney(player, old.money)
+	}
 
 	obs.remove(old);
 
@@ -650,18 +673,18 @@ function spawnShape(old, player) {
 }
 function kill(dead) {
 	calcStats(dead);
-    var killer=false;
+	var killer = false;
 	for (var player of players) {
 		if (player.id == dead.ld) {
 			var killer = player;
 		}
 	}
-	
-	if(killer){
+
+	if (killer) {
 		changeMoney(killer, int(dead.value / 2))
 	}
-	if(!killer){
-		killer={name:"Player"};
+	if (!killer) {
+		killer = { name: "Player" };
 	}
 
 	rdid = Math.random();
@@ -716,12 +739,14 @@ function calcStats(player) {
 	player.armorp = 0;
 	player.armor = 0;
 	player.regen = 10;
+	player.maxAmmo = 0;
 	player.maxBoost = calcBoost(player);
 	player.value = 0;
 	player.atype = "Melee";
 	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			player.speed += (mine.speed != undefined ? mine.speed : 0)
+			player.maxAmmo += (mine.maxAmmo != undefined ? mine.maxAmmo : 0)
 			player.damage += (mine.damage != undefined ? mine.damage : 0)
 			player.attackspeed += (mine.aspeed != undefined ? mine.aspeed : 0)
 			player.armorp += (mine.armorp != undefined ? mine.armorp : 0)
@@ -947,13 +972,13 @@ var weapons = {
 	BasicBow: {
 		name: "Basic Bow",
 		damage: 1,
-		aspeed: -3,
 		type: "Ranged",
 		cost: 10,
 		range: 750,
 		projSpeed: 5,
 		image: "bow",
 		ammolen: 70,
+		maxAmmo: 5,
 		len: 80,
 		offx: -20,
 		dispDist: 0,
@@ -1124,6 +1149,7 @@ var weapons = {
 		range: 300,
 		projSpeed: 5,
 		image: "flamethrower",
+		maxAmmo: 40,
 		st: "Lights stuff on fire when attacking.",
 		ammolen: 67,
 		len: 50,
@@ -1171,7 +1197,7 @@ var boots = {
 		image: "weirdboot",
 		wid: 50
 	},*/
-	//(10*boosttime+(1000-4*cost))*(5+0.boostspeed)
+	//(10*boosttime+(1000-4*cost))*(5+0.boostspeed) should equal about 5000
 	KnightBoots: {
 		name: "Knight Boots",
 		armor: 3,
@@ -1592,7 +1618,7 @@ io.sockets.on('connection', function (socket, username) {
 				bottom: 0
 			};
 			socket.facing = "right";
-			socket.money = 0;//setmoney
+			socket.money = 9990;//setmoney
 			socket.hasHit = [];
 			socket.hasBought = [];
 			socket.rdelay = 0;
@@ -1610,6 +1636,11 @@ io.sockets.on('connection', function (socket, username) {
 			socket.dt = [];
 			socket.rt = 0;
 			socket.regen = 10;
+			socket.availAmmo = 0;
+			socket.maxAmmo = 0;
+			socket.reloading = false;
+			socket.reloadTime=500;
+			socket.reloadDelay=0;
 			socket.effects = [];
 			players.push(socket);
 			if (info[1]) {
@@ -1733,8 +1764,6 @@ io.sockets.on('connection', function (socket, username) {
 			console.log(socket.maxCost);
 			console.log("item=");
 			console.log(item);
-
-
 		}
 
 		if (socket.money >= toPay) {
@@ -1759,6 +1788,9 @@ io.sockets.on('connection', function (socket, username) {
 			if (item.cost > socket.maxCost[z]) {
 				socket.maxCost[z] = item.cost;
 			};
+			if (item.type == "Ranged") {
+				forceReload(socket);
+			}
 			calcStats(socket);
 			socket.chealth = int(socket.mhealth * healthPerc);
 			console.log(socket.name + " bought: " + item.name);
@@ -1777,6 +1809,11 @@ io.sockets.on('connection', function (socket, username) {
 	});
 	socket.on('aend', function (info) {
 		socket.attacking = !1;
+	});
+	socket.on('reload', function () {
+		
+		forceReload(socket);
+		
 	});
 	socket.on('booststart', function (info) {
 		startBoost(socket);
@@ -1798,7 +1835,7 @@ io.sockets.on('connection', function (socket, username) {
 	});
 });
 server.listen(8080);
-lastTime=present();
+lastTime = present();
 redirectToUpdate();
 
 
