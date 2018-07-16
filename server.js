@@ -56,9 +56,9 @@ function redirectToUpdate() {
 			console.log("Server Slowdown! There are " + players.length + " players. It took " + diff + " to update. It should take " + interval + ".")
 		}
 	}
-	
+	if(randomChance(0.1)){console.log("Interval:"+adjInterval)}
     if(adjInterval<=0){
-		console.log("Interval:"+adjInterval)
+		
 		console.log("imeed")
 		setImmediate(redirectToUpdate)
 	}else{
