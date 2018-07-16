@@ -1140,22 +1140,22 @@ var weapons = {
 	},
 	//T10
 	Flamethrower: {
-		name: "Flamethrower",
-		damage: 5,
-		aspeed: 53,//21
-		armorp: 10,
-		type: "Ranged",
-		cost: 300,
-		range: 300,
-		projSpeed: 5,
-		image: "flamethrower",
-		maxAmmo: 40,
-		st: "Lights stuff on fire when attacking.",
-		ammolen: 67,
-		len: 50,
-		dispDist: 100,
-		offx: -20
-	},
+        name: "Flamethrower",
+        damage: 5,
+        aspeed: 53,//21
+        armorp: 10,
+        type: "Ranged",
+        cost: 300,
+        range: 300,
+        projSpeed: 5,
+        image: "flamethrower",
+        maxAmmo: 55,//vamp has 70h left
+        st: "Lights stuff on fire when attacking.",
+        ammolen: 67,
+        len: 50,
+        dispDist: 100,
+        offx: -20
+    },
 	VampiricSword: {
 		name: "Vampiric Sword",
 		aspeed: 4,
@@ -1618,7 +1618,7 @@ io.sockets.on('connection', function (socket, username) {
 				bottom: 0
 			};
 			socket.facing = "right";
-			socket.money = 9990;//setmoney
+			socket.money = 0;//setmoney
 			socket.hasHit = [];
 			socket.hasBought = [];
 			socket.rdelay = 0;
