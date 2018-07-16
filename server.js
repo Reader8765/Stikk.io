@@ -58,6 +58,7 @@ function redirectToUpdate() {
 	}
 	//console.log("Interval:"+adjInterval)
     if(adjInterval<=0){
+		console.log("imeed")
 		setImmediate(redirectToUpdate);
 	}else{
 		setTimeout(redirectToUpdate, adjInterval);
