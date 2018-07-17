@@ -500,8 +500,16 @@ function remProj(proj) {
 function doDamage(player, op, abil, d) {
 	player.hasHit.push(op);
 	op.ld = player.id;
-	d = Math.max(d - (Math.max(op.armor - player.armorp, 0)), 0);
-
+	var origD=d;
+	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
+		if (mine) {
+			un = mine.name.replace(/\s+/g, '')
+			if (damageModify.hasOwnProperty(un)) {
+				d+=damageModify[un](player, op,origD);
+			}
+		}
+	}
+	var d = Math.max(d - (Math.max(op.armor - player.armorp, 0)), 0);
 	for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
@@ -511,6 +519,7 @@ function doDamage(player, op, abil, d) {
 			}
 		}
 	}
+	
 	for (mine of [op.helmet, op.chest, op.boots, op.weapon]) {
 		if (mine) {
 			un = mine.name.replace(/\s+/g, '')
@@ -543,7 +552,8 @@ function ff(rid) {
 	}
 }
 function damageShape(shape, player, da, abil) {
-	shape.health -= da;
+	var origD=da
+	
 	if (abil) {
 		for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
 			if (mine) {
@@ -554,7 +564,17 @@ function damageShape(shape, player, da, abil) {
 				}
 			}
 		}
+		for (mine of [player.helmet, player.chest, player.boots, player.weapon]) {
+			if (mine) {
+				un = mine.name.replace(/\s+/g, '')
+				if (damageModify.hasOwnProperty(un)) {
+
+					da+=damageModify[un](player, shape,origD);
+				}
+			}
+		}
 	}
+	shape.health -= da;
 	if (shape.health <= 0) {
 
 		spawnShape(shape, player)
@@ -1376,7 +1396,7 @@ onShapeHit = {
 		},
 }
 
-onAttacked = {
+var onAttacked = {
 	ChainmailChestplate:
 		function (player, op, damage) {
 
@@ -1399,6 +1419,16 @@ onAttacked = {
 		return damage;
 	}
 
+}
+var damageModify={
+	ArcherCloak:
+	function(player,op,damage){
+		if(player.atype=="Ranged"){
+			return Math.round(damage*0.2)//increase by 20%
+		}
+		return 0
+	}
+	
 }
 for (var i = 0; i < (numobs * 0.4); i++) {
 	nx = Math.floor((Math.random() * maplimitx));
